@@ -19,7 +19,6 @@
 	/* A caress is a drag across the cat. Without this the browser reads it as the
 	   start of a scroll and the cat is impossible to stroke on a phone. */
 	touch-action: none;
-	user-select: none;
 	-webkit-tap-highlight-color: transparent;
 	transition: transform 140ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
