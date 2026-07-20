@@ -1,0 +1,122 @@
+/* ─── Tokens ───────────────────────────────────────────────────────────────────
+   One brand family (warm orange) plus two semantic colours that mean exactly one
+   thing each: green is "you were right", red is "you were not". Nothing else in
+   the app uses them, so they never have to be read in context. */
+
+:root {
+	--bg: #fdf6ec;
+	--surface: #ffffff;
+	--surface-sunk: #f7ede0;
+	--text: #2b2018;
+	--muted: #6b5a4c;
+	--line: #2b2018;
+	--line-soft: #e0cdb6;
+
+	--brand: #c2410c;
+	--brand-hover: #9a3412;
+	--brand-on: #ffffff;
+	--brand-tint: #ffe8d4;
+
+	--ok: #15803d;
+	--ok-tint: #dcfce7;
+	--bad: #b91c1c;
+	--bad-tint: #fee2e2;
+
+	/* The cat keeps its own colours in both themes so it stays the same cat. */
+	--cat-fur: #ffcf8f;
+	--cat-line: #3b2a1e;
+	--cat-pink: #ff9aa8;
+	--cat-tear: #57a5f5;
+	--cat-spark: #f5b301;
+
+	--radius: 16px;
+	--shadow: 3px 3px 0 var(--line);
+	--shadow-lg: 5px 5px 0 var(--line);
+
+	color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #191310;
+		--surface: #241b15;
+		--surface-sunk: #2f241c;
+		--text: #f7ece1;
+		--muted: #bda894;
+		--line: #0f0b08;
+		--line-soft: #43332a;
+
+		--brand: #ff8a4c;
+		--brand-hover: #ffa06b;
+		--brand-on: #241b15;
+		--brand-tint: #3a2418;
+
+		--ok: #4ade80;
+		--ok-tint: #14301f;
+		--bad: #fb7185;
+		--bad-tint: #3a1720;
+
+		color-scheme: dark;
+	}
+}
+
+/* ─── Reset ────────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+* {
+	margin: 0;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	min-height: 100dvh;
+	background: var(--bg);
+	color: var(--text);
+	font-family: ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, -apple-system,
+		"Helvetica Neue", sans-serif;
+	font-size: 17px;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+	/* A soft dot grid so the background is not a flat sheet, faint enough that it
+	   never competes with the text sitting on it. */
+	background-image: radial-gradient(
+		circle at 1px 1px,
+		var(--line-soft) 1px,
+		transparent 0
+	);
+	background-size: 28px 28px;
+}
+
+input,
+button,
+table {
+	font: inherit;
+	color: inherit;
+}
+
+button {
+	cursor: pointer;
+}
+
+h1,
+h2,
+h3 {
+	line-height: 1.15;
+	letter-spacing: -0.02em;
+	text-wrap: balance;
+}
+
+/* One visible focus style everywhere. Keyboard users are studying too. */
+:focus-visible {
+	outline: 3px solid var(--brand);
+	outline-offset: 3px;
+	border-radius: 6px;
+}
