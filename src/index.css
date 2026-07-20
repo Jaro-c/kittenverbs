@@ -28,6 +28,12 @@
 	--cat-pink: #ff9aa8;
 	--cat-tear: #57a5f5;
 	--cat-spark: #f5b301;
+	/* Wardrobe and affection. Deliberately outside the two theme blocks, for the
+	   same reason as the fur above: it is the same cat wearing the same bufanda
+	   at 7am and at midnight. */
+	--cat-bow: #e8456f;
+	--cat-wool: #4f9dd4;
+	--cat-heart: #ff6b8a;
 
 	--radius: 16px;
 	--shadow: 3px 3px 0 var(--line);

@@ -1,3 +1,5 @@
+import { isAccessoryId, type AccessoryId } from "./accessories";
+
 const KEY = "kittenverbs:progress:v1";
 
 /** Questions answered in a day to count it toward the weekly goal. */
@@ -27,6 +29,20 @@ export interface Progress {
 	streak: number;
 	/** Local ISO date (YYYY-MM-DD) of the last session, for streak math. */
 	lastDay: string | null;
+	/**
+	 * Lifetime questions answered. `days` is pruned to a fortnight, so a
+	 * "100 questions" milestone can never be summed back out of it — it has to be
+	 * counted separately or it silently resets every two weeks.
+	 */
+	answeredTotal: number;
+	/** Sessions finished, any mode. */
+	sessionsDone: number;
+	/** Times the kitten has been petted. Useful for nothing, which is the point. */
+	pets: number;
+	/** Ids of achievements already earned. */
+	unlocked: string[];
+	/** Accessory the kitten is wearing, or null for none. */
+	accessory: AccessoryId | null;
 }
 
 const EMPTY: Progress = {
@@ -36,6 +52,11 @@ const EMPTY: Progress = {
 	bestExam: null,
 	streak: 0,
 	lastDay: null,
+	answeredTotal: 0,
+	sessionsDone: 0,
+	pets: 0,
+	unlocked: [],
+	accessory: null,
 };
 
 /**
@@ -55,6 +76,13 @@ export function loadProgress(): Progress {
 			bestExam: parsed.bestExam ?? null,
 			streak: parsed.streak ?? 0,
 			lastDay: parsed.lastDay ?? null,
+			answeredTotal: parsed.answeredTotal ?? 0,
+			sessionsDone: parsed.sessionsDone ?? 0,
+			pets: parsed.pets ?? 0,
+			// Arrays get a shape check, not just a default: a blob where `unlocked`
+			// is a string would otherwise sail through and blow up on .map().
+			unlocked: Array.isArray(parsed.unlocked) ? parsed.unlocked : [],
+			accessory: isAccessoryId(parsed.accessory) ? parsed.accessory : null,
 		};
 	} catch {
 		return { ...EMPTY };
@@ -151,15 +179,30 @@ export function recordSession(
 	}
 
 	return {
+		...progress,
 		verbs,
 		days,
 		goalPerDay: progress.goalPerDay,
 		streak,
 		lastDay: day,
+		answeredTotal: progress.answeredTotal + results.length,
+		sessionsDone: progress.sessionsDone + 1,
 		bestExam: exam
 			? Math.max(progress.bestExam ?? 0, exam.scorePercent)
 			: progress.bestExam,
 	};
+}
+
+/** One more stroke of the cat, saved so the count survives a reload. */
+export function recordPet(progress: Progress): Progress {
+	return { ...progress, pets: progress.pets + 1 };
+}
+
+export function wearAccessory(
+	progress: Progress,
+	accessory: AccessoryId | null,
+): Progress {
+	return { ...progress, accessory };
 }
 
 // ─── Weekly goal ───────────────────────────────────────────────────────────────

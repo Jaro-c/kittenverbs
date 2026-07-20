@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { getVerb } from "../data/verbs";
+import type { AccessoryId } from "../lib/accessories";
+import { MISSES_TITLE, TIMED_OUT_NOTE, verdict } from "../lib/copy";
 import { FIELD_LABEL } from "../lib/exercises";
 import { playFinish } from "../lib/sound";
 import type { Attempt, SessionMode } from "../lib/types";
-import { Kitten } from "./Kitten";
-import { Particles, type Burst } from "./Particles";
+import { KittenStage } from "./KittenStage";
+import type { BurstKind } from "./Particles";
 
 interface Props {
 	attempts: Attempt[];
@@ -12,6 +14,9 @@ interface Props {
 	timedOut: boolean;
 	/** Ids of verbs missed at least once, for the review round. */
 	missedVerbIds: string[];
+	accessory: AccessoryId | null;
+	onPet: (x: number, y: number) => void;
+	onBurst: (kind: BurstKind, x?: number, y?: number) => void;
 	onReviewMissed: () => void;
 	onHome: () => void;
 }
@@ -21,6 +26,9 @@ export function Results({
 	mode,
 	timedOut,
 	missedVerbIds,
+	accessory,
+	onPet,
+	onBurst,
 	onReviewMissed,
 	onHome,
 }: Props) {
@@ -31,7 +39,6 @@ export function Results({
 
 	const mood = percent >= 90 ? "celebrate" : percent >= 60 ? "happy" : "sad";
 
-	const [burst, setBurst] = useState<Burst | null>(null);
 	const played = useRef(false);
 
 	// Once per mount. React 18+ runs effects twice in StrictMode during
@@ -41,15 +48,18 @@ export function Results({
 		played.current = true;
 		playFinish(percent >= 60);
 		if (percent >= 60) {
-			setBurst({ id: 1, kind: percent >= 90 ? "paws" : "confetti" });
+			onBurst(percent >= 90 ? "paws" : "confetti");
 		}
-	}, [percent]);
+	}, [percent, onBurst]);
 
 	return (
 		<section className="results">
-			<Particles burst={burst} />
-
-			<Kitten mood={mood} size={150} />
+			<KittenStage
+				mood={mood}
+				size={150}
+				accessory={accessory}
+				onPet={onPet}
+			/>
 
 			<h2 className="results__score">
 				{right} <span>/ {total}</span>
@@ -57,16 +67,14 @@ export function Results({
 			<p className="results__percent">{percent}%</p>
 
 			{timedOut && (
-				<p className="results__note results__note--warn">
-					Se acabó el tiempo. Las preguntas sin responder cuentan como falladas.
-				</p>
+				<p className="results__note results__note--warn">{TIMED_OUT_NOTE}</p>
 			)}
 
 			<p className="results__verdict">{verdict(percent, mode)}</p>
 
 			{wrong.length > 0 && (
 				<div className="misses">
-					<h3 className="misses__title">Para repasar</h3>
+					<h3 className="misses__title">{MISSES_TITLE}</h3>
 					<ul className="misses__list">
 						{wrong.map((attempt, i) => {
 							const verb = getVerb(attempt.verbId);
@@ -97,7 +105,8 @@ export function Results({
 			<div className="results__actions">
 				{missedVerbIds.length > 0 && (
 					<button className="btn btn--primary" type="button" onClick={onReviewMissed}>
-						Repasar los {missedVerbIds.length} fallados
+						Repasar {missedVerbIds.length}{" "}
+						{missedVerbIds.length === 1 ? "verbo" : "verbos"}
 					</button>
 				)}
 				<button className="btn btn--ghost" type="button" onClick={onHome}>
@@ -106,15 +115,4 @@ export function Results({
 			</div>
 		</section>
 	);
-}
-
-function verdict(percent: number, mode: SessionMode): string {
-	if (mode === "exam") {
-		if (percent >= 90) return "Listo para mañana.";
-		if (percent >= 70) return "Vas bien. Repasa los fallados y repite el simulacro.";
-		return "Todavía no. Practica los fallados y vuelve al simulacro.";
-	}
-	if (percent >= 90) return "Te los sabes. Prueba el simulacro cronometrado.";
-	if (percent >= 60) return "Bien encaminado. Otra ronda y quedan.";
-	return "Repasa la tabla y vuelve a intentarlo.";
 }

@@ -129,3 +129,66 @@ export function playTick(): void {
 	if (!guard()) return;
 	tone(880, { dur: 0.04, peak: 0.06, type: "square" });
 }
+
+/** Two soft notes for a milestone. Warm, not a fanfare — it interrupts nothing. */
+export function playUnlock(): void {
+	if (!guard()) return;
+	tone(587.33, { dur: 0.18, peak: 0.1 }); // D5
+	tone(880, { at: 0.11, dur: 0.28, peak: 0.09 }); // A5
+}
+
+/** Petting can be held down; without this the purrs would stack into a drone. */
+let purringUntil = 0;
+
+/**
+ * A purr, which is not a note and cannot be made with one.
+ *
+ * What the ear recognises is not pitch but flutter: a cat purrs at roughly
+ * 25 cycles a second, and that rate is the amplitude envelope, not the tone. So
+ * the body is a very low carrier (~55Hz, below where the ear hears melody), a
+ * lowpass kills the sawtooth's harmonics so it rumbles instead of buzzing, and a
+ * 25Hz oscillator chops the gain to make the flutter. Short and quiet: it is
+ * affection, not an alarm, and she may hold the cat down for a while.
+ */
+export function playPurr(): void {
+	if (!guard()) return;
+	const c = audio();
+	if (!c) return;
+	if (c.currentTime < purringUntil) return;
+
+	const now = c.currentTime;
+	const dur = 0.8;
+	purringUntil = now + dur * 0.75;
+
+	const carrier = c.createOscillator();
+	carrier.type = "sawtooth";
+	carrier.frequency.setValueAtTime(56, now);
+	carrier.frequency.linearRampToValueAtTime(48, now + dur);
+
+	const body = c.createBiquadFilter();
+	body.type = "lowpass";
+	body.frequency.setValueAtTime(300, now);
+	body.Q.setValueAtTime(0.7, now);
+
+	const flutter = c.createGain();
+	flutter.gain.setValueAtTime(0.55, now);
+	const rate = c.createOscillator();
+	rate.type = "sine";
+	rate.frequency.setValueAtTime(25, now);
+	const depth = c.createGain();
+	depth.gain.setValueAtTime(0.45, now);
+	rate.connect(depth);
+	depth.connect(flutter.gain);
+
+	const out = c.createGain();
+	out.gain.setValueAtTime(0.0001, now);
+	out.gain.exponentialRampToValueAtTime(0.11, now + 0.14);
+	out.gain.setValueAtTime(0.11, now + dur * 0.55);
+	out.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+	carrier.connect(body).connect(flutter).connect(out).connect(c.destination);
+	carrier.start(now);
+	carrier.stop(now + dur + 0.05);
+	rate.start(now);
+	rate.stop(now + dur + 0.05);
+}

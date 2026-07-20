@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export type BurstKind = "confetti" | "paws";
+export type BurstKind = "confetti" | "paws" | "hearts";
 
 export interface Burst {
 	/** Changes on every burst; that change is what triggers the spawn. */
@@ -23,10 +23,27 @@ interface Particle {
 	maxLife: number;
 	color: string;
 	shape: BurstKind;
+	/** Per particle, because hearts rise and confetti falls. */
+	gravity: number;
 }
 
-const GRAVITY = 0.28;
 const DRAG = 0.99;
+
+/**
+ * Hearts are not confetti with a different sprite.
+ *
+ * Confetti is thrown: it is fast, heavy and it lands. Affection floats — so
+ * hearts get negative gravity, a fraction of the launch speed and a long life,
+ * which is what makes them read as drifting up rather than being fired.
+ */
+const RECIPE: Record<
+	BurstKind,
+	{ count: number; gravity: number; speed: number; spread: number; life: number; size: number }
+> = {
+	confetti: { count: 46, gravity: 0.28, speed: 7, spread: 1.9, life: 60, size: 5 },
+	paws: { count: 16, gravity: 0.28, speed: 7, spread: 1.9, life: 60, size: 9 },
+	hearts: { count: 7, gravity: -0.055, speed: 2.2, spread: 1.1, life: 78, size: 11 },
+};
 
 /**
  * A canvas overlay for celebration bursts.
@@ -69,27 +86,28 @@ export function Particles({ burst }: { burst: Burst | null }) {
 		// starts, so it costs nothing rather than being hidden with opacity.
 		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-		const palette = readPalette();
+		const palette = readPalette(burst.kind);
+		const recipe = RECIPE[burst.kind];
 		const originX = burst.x ?? window.innerWidth / 2;
 		const originY = burst.y ?? window.innerHeight / 3;
-		const count = burst.kind === "confetti" ? 46 : 16;
 
-		for (let i = 0; i < count; i++) {
-			const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.9;
-			const speed = 5 + Math.random() * 7;
-			const maxLife = 60 + Math.random() * 45;
+		for (let i = 0; i < recipe.count; i++) {
+			const angle = -Math.PI / 2 + (Math.random() - 0.5) * recipe.spread;
+			const speed = recipe.speed * (0.6 + Math.random() * 0.7);
+			const maxLife = recipe.life + Math.random() * 45;
 			particles.current.push({
 				x: originX + (Math.random() - 0.5) * 40,
 				y: originY + (Math.random() - 0.5) * 20,
 				vx: Math.cos(angle) * speed,
 				vy: Math.sin(angle) * speed,
-				rot: Math.random() * Math.PI * 2,
-				vrot: (Math.random() - 0.5) * 0.28,
-				size: burst.kind === "confetti" ? 5 + Math.random() * 6 : 9 + Math.random() * 6,
+				rot: burst.kind === "hearts" ? (Math.random() - 0.5) * 0.5 : Math.random() * Math.PI * 2,
+				vrot: (Math.random() - 0.5) * (burst.kind === "hearts" ? 0.03 : 0.28),
+				size: recipe.size + Math.random() * 6,
 				life: maxLife,
 				maxLife,
 				color: palette[Math.floor(Math.random() * palette.length)],
 				shape: burst.kind,
+				gravity: recipe.gravity,
 			});
 		}
 
@@ -107,14 +125,16 @@ export function Particles({ burst }: { burst: Burst | null }) {
 
 		const alive: Particle[] = [];
 		for (const p of particles.current) {
-			p.vy += GRAVITY;
+			p.vy += p.gravity;
 			p.vx *= DRAG;
 			p.vy *= DRAG;
 			p.x += p.vx;
 			p.y += p.vy;
 			p.rot += p.vrot;
 			p.life -= 1;
-			if (p.life <= 0 || p.y > window.innerHeight + 60) continue;
+			// A rising heart leaves through the top; culling only on the bottom edge
+			// would keep it alive off-screen for the rest of its life.
+			if (p.life <= 0 || p.y > window.innerHeight + 60 || p.y < -80) continue;
 
 			ctx.save();
 			ctx.globalAlpha = Math.min(1, p.life / (p.maxLife * 0.4));
@@ -122,6 +142,7 @@ export function Particles({ burst }: { burst: Burst | null }) {
 			ctx.rotate(p.rot);
 			ctx.fillStyle = p.color;
 			if (p.shape === "confetti") drawConfetti(ctx, p.size);
+			else if (p.shape === "hearts") drawHeart(ctx, p.size);
 			else drawPaw(ctx, p.size);
 			ctx.restore();
 			alive.push(p);
@@ -168,14 +189,29 @@ function drawPaw(ctx: CanvasRenderingContext2D, size: number) {
 	}
 }
 
+function drawHeart(ctx: CanvasRenderingContext2D, size: number) {
+	const s = size / 2;
+	ctx.beginPath();
+	ctx.moveTo(0, s * 0.9);
+	ctx.bezierCurveTo(-s * 1.5, -s * 0.2, -s * 0.6, -s * 1.3, 0, -s * 0.4);
+	ctx.bezierCurveTo(s * 0.6, -s * 1.3, s * 1.5, -s * 0.2, 0, s * 0.9);
+	ctx.fill();
+}
+
 /**
  * Colours come from the live custom properties, so the burst follows whichever
  * theme is active instead of carrying a second, hardcoded palette that would
  * silently drift from the first.
+ *
+ * Hearts get their own short list. Celebration confetti is meant to be a jumble
+ * of everything; affection reading as a random colour draw would not land.
  */
-function readPalette(): string[] {
+function readPalette(kind: BurstKind): string[] {
 	const styles = getComputedStyle(document.documentElement);
-	const names = ["--brand", "--cat-fur", "--cat-pink", "--cat-spark", "--ok"];
+	const names =
+		kind === "hearts"
+			? ["--cat-heart", "--cat-pink", "--cat-bow"]
+			: ["--brand", "--cat-fur", "--cat-pink", "--cat-spark", "--ok"];
 	const colors = names
 		.map((n) => styles.getPropertyValue(n).trim())
 		.filter(Boolean);

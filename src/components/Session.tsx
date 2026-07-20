@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { AccessoryId } from "../lib/accessories";
 import { canonicalAnswer, isCorrect, isNearMiss } from "../lib/check";
+import { missLine, praiseLine } from "../lib/copy";
 import { FIELD_LABEL } from "../lib/exercises";
 import type { Attempt, Exercise, Field, SessionMode } from "../lib/types";
 import {
@@ -11,8 +13,9 @@ import {
 import { ChoiceGrid } from "./exercises/ChoiceGrid";
 import { CompleteRow } from "./exercises/CompleteRow";
 import { TypeAnswer } from "./exercises/TypeAnswer";
-import { Kitten, type Mood } from "./Kitten";
-import { Particles, type Burst } from "./Particles";
+import { type Mood } from "./Kitten";
+import { KittenStage } from "./KittenStage";
+import type { BurstKind } from "./Particles";
 import { SoundToggle } from "./SoundToggle";
 
 interface Props {
@@ -20,6 +23,9 @@ interface Props {
 	mode: SessionMode;
 	/** Total seconds for the whole run. Only used in exam mode. */
 	timeLimitSec?: number;
+	accessory: AccessoryId | null;
+	onPet: (x: number, y: number) => void;
+	onBurst: (kind: BurstKind, x?: number, y?: number) => void;
 	onFinish: (attempts: Attempt[], timedOut: boolean) => void;
 	onQuit: () => void;
 }
@@ -29,6 +35,12 @@ interface Feedback {
 	nearMiss: boolean;
 	expected: string[];
 	asked: Field[];
+	/**
+	 * Chosen when the answer is graded, not while rendering. Picking a random
+	 * line inside the JSX would reword itself on every re-render — the timer tick
+	 * alone would reshuffle it once a second.
+	 */
+	line: string;
 }
 
 /** Which fields a given exercise grades, in the order they are answered. */
@@ -40,6 +52,9 @@ export function Session({
 	exercises,
 	mode,
 	timeLimitSec,
+	accessory,
+	onPet,
+	onBurst,
 	onFinish,
 	onQuit,
 }: Props) {
@@ -49,11 +64,9 @@ export function Session({
 	const [picked, setPicked] = useState<string | null>(null);
 	const [streak, setStreak] = useState(0);
 	const [remaining, setRemaining] = useState(timeLimitSec ?? 0);
-	const [burst, setBurst] = useState<Burst | null>(null);
 
 	const shownAt = useRef(Date.now());
 	const kittenRef = useRef<HTMLDivElement>(null);
-	const burstId = useRef(0);
 	const continueRef = useRef<HTMLButtonElement>(null);
 	// onFinish is called from inside the timer effect; holding it in a ref keeps
 	// the countdown from resetting every time the parent re-renders.
@@ -100,15 +113,13 @@ export function Session({
 	);
 
 	/** Spawns particles from wherever the cat currently is on screen. */
-	const fireBurst = (kind: Burst["kind"]) => {
+	const fireBurst = (kind: BurstKind) => {
 		const box = kittenRef.current?.getBoundingClientRect();
-		burstId.current += 1;
-		setBurst({
-			id: burstId.current,
+		onBurst(
 			kind,
-			x: box ? box.left + box.width / 2 : undefined,
-			y: box ? box.top + box.height / 2 : undefined,
-		});
+			box ? box.left + box.width / 2 : undefined,
+			box ? box.top + box.height / 2 : undefined,
+		);
 	};
 
 	const handleSubmit = (given: string[]) => {
@@ -159,6 +170,7 @@ export function Session({
 			nearMiss,
 			expected: attempt.expected,
 			asked: fields,
+			line: correct ? praiseLine(nextStreak) : missLine(nearMiss),
 		});
 	};
 
@@ -178,8 +190,6 @@ export function Session({
 
 	return (
 		<section className="session">
-			<Particles burst={burst} />
-
 			<header className="session__bar">
 				<button className="btn btn--ghost" type="button" onClick={onQuit}>
 					Salir
@@ -213,8 +223,16 @@ export function Session({
 			</header>
 
 			<div className="session__stage">
+				{/* The mood prop is the ONLY thing that reacts to an answer, and in
+				    exam mode it never leaves "thinking". Petting is hers to start, so
+				    it stays available even here: it reveals nothing about the score. */}
 				<div ref={kittenRef}>
-					<Kitten mood={mood} size={140} />
+					<KittenStage
+						mood={mood}
+						size={140}
+						accessory={accessory}
+						onPet={onPet}
+					/>
 				</div>
 
 				<span className="session__count">
@@ -252,13 +270,7 @@ export function Session({
 					role="status"
 				>
 					<div className="feedback__text">
-						<strong>
-							{feedback.correct
-								? pickPraise(streak)
-								: feedback.nearMiss
-									? "Casi — revisa la escritura"
-									: "No era esa"}
-						</strong>
+						<strong>{feedback.line}</strong>
 						{!feedback.correct && (
 							<span>
 								{feedback.asked.map((field, i) => (
@@ -287,11 +299,4 @@ function formatClock(seconds: number): string {
 	const m = Math.floor(seconds / 60);
 	const s = seconds % 60;
 	return `${m}:${String(s).padStart(2, "0")}`;
-}
-
-const PRAISE = ["¡Bien!", "¡Correcto!", "¡Eso es!", "¡Exacto!"];
-
-function pickPraise(streak: number): string {
-	if (streak >= 5) return `¡${streak} seguidas! 🔥`;
-	return PRAISE[Math.floor(Math.random() * PRAISE.length)];
 }

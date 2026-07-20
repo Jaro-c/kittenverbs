@@ -1,0 +1,62 @@
+/* ─── Wearables ────────────────────────────────────────────────────────────────
+   Same construction as the cat: one flat fill, one dark outline, no gradients
+   and no blur, so an accessory reads as part of the same drawing rather than a
+   sticker. The palette is fixed across both themes for the same reason the fur
+   is — she should recognise her own cat at a glance, day or night. */
+
+.acc__wool,
+.acc__knot {
+	fill: var(--cat-bow);
+	stroke: var(--cat-line);
+	stroke-width: 2.2;
+	stroke-linejoin: round;
+}
+
+.acc__cloth {
+	fill: var(--cat-wool);
+	stroke: var(--cat-line);
+	stroke-width: 2.2;
+	stroke-linejoin: round;
+}
+
+.acc__stripe {
+	fill: none;
+	stroke: var(--cat-line);
+	stroke-width: 1.6;
+	stroke-linecap: round;
+	opacity: 0.55;
+}
+
+.acc__cone {
+	fill: var(--cat-wool);
+	stroke: var(--cat-line);
+	stroke-width: 2.2;
+	stroke-linejoin: round;
+}
+
+.acc__brim {
+	fill: var(--cat-bow);
+	stroke: var(--cat-line);
+	stroke-width: 2.2;
+}
+
+.acc__pom {
+	fill: var(--cat-bow);
+	stroke: var(--cat-line);
+	stroke-width: 2.2;
+}
+
+/* Lenses stay unfilled: a tint would sit straight on top of the pupils, and the
+   eyes are the one part of this cat that has to stay readable. */
+.acc__lens {
+	fill: none;
+	stroke: var(--cat-line);
+	stroke-width: 2.6;
+}
+
+.acc__frame {
+	fill: none;
+	stroke: var(--cat-line);
+	stroke-width: 2.6;
+	stroke-linecap: round;
+}

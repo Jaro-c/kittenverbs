@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { VERBS } from "../data/verbs";
-import type { Pattern } from "../lib/types";
+import type { AccessoryId } from "../lib/accessories";
+import { greeting } from "../lib/copy";
 import type { Progress } from "../lib/storage";
-import { Kitten } from "./Kitten";
+import type { Pattern } from "../lib/types";
+import { KittenStage } from "./KittenStage";
 import { SoundToggle } from "./SoundToggle";
+import { Trophies } from "./Trophies";
 import { WeekGoal } from "./WeekGoal";
 
 interface Props {
@@ -11,6 +14,8 @@ interface Props {
 	weakIds: string[];
 	onPractice: (verbIds?: string[]) => void;
 	onExam: () => void;
+	onPet: (x: number, y: number) => void;
+	onWear: (accessory: AccessoryId | null) => void;
 	onReset: () => void;
 }
 
@@ -19,9 +24,22 @@ const PATTERN_NOTE: Record<Pattern, string> = {
 	ABC: "las tres formas distintas",
 };
 
-export function Home({ progress, weakIds, onPractice, onExam, onReset }: Props) {
+export function Home({
+	progress,
+	weakIds,
+	onPractice,
+	onExam,
+	onPet,
+	onWear,
+	onReset,
+}: Props) {
 	const [tableOpen, setTableOpen] = useState(false);
 	const [pattern, setPattern] = useState<Pattern | "all">("all");
+
+	// Memoised because it reads the clock. Recomputing on every render would let
+	// the hello change under her mid-screen when the hour turns over, or worse,
+	// flip between two wordings on an unrelated re-render.
+	const hello = useMemo(() => greeting(progress), [progress]);
 
 	const shown = pattern === "all" ? VERBS : VERBS.filter((v) => v.pattern === pattern);
 	const seen = Object.keys(progress.verbs).length;
@@ -29,9 +47,17 @@ export function Home({ progress, weakIds, onPractice, onExam, onReset }: Props) 
 	return (
 		<section className="home">
 			<header className="home__hero">
-				<Kitten mood="idle" size={150} />
+				<KittenStage
+					mood="idle"
+					size={150}
+					accessory={progress.accessory}
+					onPet={onPet}
+					hint={progress.pets === 0}
+				/>
+				<p className="home__hello">{hello.hello}</p>
 				<h1 className="home__title">Kitten Verbs</h1>
-				<p className="home__sub">
+				<p className="home__sub">{hello.line}</p>
+				<p className="home__meta">
 					15 verbos irregulares · infinitive · past · past participle
 				</p>
 			</header>
@@ -82,13 +108,15 @@ export function Home({ progress, weakIds, onPractice, onExam, onReset }: Props) 
 						type="button"
 						onClick={() => onPractice(weakIds)}
 					>
-						Repasar mis fallados
+						Repasar los que se me escapan
 						<small>
 							{weakIds.length} {weakIds.length === 1 ? "verbo" : "verbos"}
 						</small>
 					</button>
 				)}
 			</div>
+
+			<Trophies progress={progress} onWear={onWear} />
 
 			<div className="table-block">
 				<button
