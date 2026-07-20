@@ -638,6 +638,150 @@
 	color: var(--bad);
 }
 
+/* ─── Particles ────────────────────────────────────────────────────────────────
+   A fixed overlay that must never intercept a click; the buttons underneath stay
+   fully usable while confetti is still falling over them. */
+
+.particles {
+	position: fixed;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 50;
+}
+
+/* ─── Sound toggle ─────────────────────────────────────────────────────────── */
+
+.sound-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+	min-height: 44px;
+	padding: 0.4rem 0.85rem;
+	background: transparent;
+	border: 2px solid var(--line-soft);
+	border-radius: 999px;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--muted);
+	transition: border-color 140ms ease, color 140ms ease;
+}
+
+.sound-toggle:hover {
+	border-color: var(--brand);
+	color: var(--text);
+}
+
+.sound-toggle--compact {
+	min-height: 36px;
+	min-width: 36px;
+	padding: 0.25rem 0.45rem;
+	border-color: transparent;
+	font-size: 1rem;
+}
+
+/* ─── Weekly goal ──────────────────────────────────────────────────────────── */
+
+.week {
+	display: flex;
+	flex-direction: column;
+	gap: 0.7rem;
+	padding: 0.95rem 1.1rem;
+	background: var(--surface);
+	border: 2px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+}
+
+.week__head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+.week__count {
+	font-size: 0.95rem;
+}
+
+.week__count b {
+	font-size: 1.2rem;
+	color: var(--brand);
+}
+
+.week__hint {
+	font-size: 0.82rem;
+	color: var(--muted);
+}
+
+.week__dots {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 0.35rem;
+	list-style: none;
+	padding: 0;
+}
+
+.week__day {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.week__dot {
+	display: grid;
+	place-items: center;
+	width: 100%;
+	aspect-ratio: 1;
+	max-width: 40px;
+	border: 2px dashed var(--line-soft);
+	border-radius: 50%;
+	background: var(--surface-sunk);
+	font-size: 0.9rem;
+	line-height: 1;
+}
+
+.week__dot--met {
+	border-style: solid;
+	border-color: var(--brand);
+	background: var(--brand-tint);
+}
+
+/* Today is marked by a ring rather than a fill, so "today" and "done" stay two
+   separate readings instead of one ambiguous highlight. */
+.week__dot--today {
+	outline: 2px solid var(--brand);
+	outline-offset: 2px;
+}
+
+.week__letter {
+	font-size: 0.7rem;
+	color: var(--muted);
+	font-weight: 600;
+}
+
+.home__foot {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+/* Visible to a screen reader, not to the eye. */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
 /* ─── Motion ───────────────────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {

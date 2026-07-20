@@ -3,6 +3,8 @@ import { VERBS } from "../data/verbs";
 import type { Pattern } from "../lib/types";
 import type { Progress } from "../lib/storage";
 import { Kitten } from "./Kitten";
+import { SoundToggle } from "./SoundToggle";
+import { WeekGoal } from "./WeekGoal";
 
 interface Props {
 	progress: Progress;
@@ -60,6 +62,8 @@ export function Home({ progress, weakIds, onPractice, onExam, onReset }: Props) 
 					)}
 				</div>
 			)}
+
+			<WeekGoal progress={progress} />
 
 			<div className="home__actions">
 				<button className="btn btn--primary btn--big" type="button" onClick={() => onPractice()}>
@@ -145,11 +149,14 @@ export function Home({ progress, weakIds, onPractice, onExam, onReset }: Props) 
 				)}
 			</div>
 
-			{seen > 0 && (
-				<button className="link-reset" type="button" onClick={onReset}>
-					Borrar mi progreso
-				</button>
-			)}
+			<footer className="home__foot">
+				<SoundToggle />
+				{seen > 0 && (
+					<button className="link-reset" type="button" onClick={onReset}>
+						Borrar mi progreso
+					</button>
+				)}
+			</footer>
 		</section>
 	);
 }

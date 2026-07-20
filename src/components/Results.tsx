@@ -1,7 +1,10 @@
+import { useEffect, useRef, useState } from "react";
 import { getVerb } from "../data/verbs";
 import { FIELD_LABEL } from "../lib/exercises";
+import { playFinish } from "../lib/sound";
 import type { Attempt, SessionMode } from "../lib/types";
 import { Kitten } from "./Kitten";
+import { Particles, type Burst } from "./Particles";
 
 interface Props {
 	attempts: Attempt[];
@@ -28,8 +31,24 @@ export function Results({
 
 	const mood = percent >= 90 ? "celebrate" : percent >= 60 ? "happy" : "sad";
 
+	const [burst, setBurst] = useState<Burst | null>(null);
+	const played = useRef(false);
+
+	// Once per mount. React 18+ runs effects twice in StrictMode during
+	// development, and without the guard the fanfare stacks on itself.
+	useEffect(() => {
+		if (played.current) return;
+		played.current = true;
+		playFinish(percent >= 60);
+		if (percent >= 60) {
+			setBurst({ id: 1, kind: percent >= 90 ? "paws" : "confetti" });
+		}
+	}, [percent]);
+
 	return (
 		<section className="results">
+			<Particles burst={burst} />
+
 			<Kitten mood={mood} size={150} />
 
 			<h2 className="results__score">

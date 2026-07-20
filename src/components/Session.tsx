@@ -2,10 +2,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { canonicalAnswer, isCorrect, isNearMiss } from "../lib/check";
 import { FIELD_LABEL } from "../lib/exercises";
 import type { Attempt, Exercise, Field, SessionMode } from "../lib/types";
+import {
+	playCorrect,
+	playStreak,
+	playTick,
+	playWrong,
+} from "../lib/sound";
 import { ChoiceGrid } from "./exercises/ChoiceGrid";
 import { CompleteRow } from "./exercises/CompleteRow";
 import { TypeAnswer } from "./exercises/TypeAnswer";
 import { Kitten, type Mood } from "./Kitten";
+import { Particles, type Burst } from "./Particles";
+import { SoundToggle } from "./SoundToggle";
 
 interface Props {
 	exercises: Exercise[];
@@ -41,8 +49,11 @@ export function Session({
 	const [picked, setPicked] = useState<string | null>(null);
 	const [streak, setStreak] = useState(0);
 	const [remaining, setRemaining] = useState(timeLimitSec ?? 0);
+	const [burst, setBurst] = useState<Burst | null>(null);
 
 	const shownAt = useRef(Date.now());
+	const kittenRef = useRef<HTMLDivElement>(null);
+	const burstId = useRef(0);
 	const continueRef = useRef<HTMLButtonElement>(null);
 	// onFinish is called from inside the timer effect; holding it in a ref keeps
 	// the countdown from resetting every time the parent re-renders.
@@ -88,6 +99,18 @@ export function Session({
 		[isLast],
 	);
 
+	/** Spawns particles from wherever the cat currently is on screen. */
+	const fireBurst = (kind: Burst["kind"]) => {
+		const box = kittenRef.current?.getBoundingClientRect();
+		burstId.current += 1;
+		setBurst({
+			id: burstId.current,
+			kind,
+			x: box ? box.left + box.width / 2 : undefined,
+			y: box ? box.top + box.height / 2 : undefined,
+		});
+	};
+
 	const handleSubmit = (given: string[]) => {
 		const fields = askedFields(exercise);
 		const correct = fields.every((field, i) =>
@@ -107,17 +130,30 @@ export function Session({
 			elapsedMs: Date.now() - shownAt.current,
 		};
 		const nextAttempts = [...attempts, attempt];
+		const nextStreak = correct ? streak + 1 : 0;
 		setAttempts(nextAttempts);
-		setStreak(correct ? streak + 1 : 0);
+		setStreak(nextStreak);
 		if (exercise.kind === "choice") setPicked(given[0]);
 
 		// In exam mode nothing is revealed mid-run: seeing the answer would turn
 		// the remaining questions into a reading exercise and the final score
-		// would stop meaning anything.
+		// would stop meaning anything. Audio has to honour the same rule — a
+		// rising chime after every right answer would announce the score one
+		// question at a time, so the exam gets a neutral tick and nothing else.
 		if (mode === "exam") {
+			playTick();
 			advance(nextAttempts);
 			return;
 		}
+
+		if (correct) {
+			if (nextStreak >= 3) playStreak();
+			else playCorrect();
+			fireBurst(nextStreak >= 3 ? "paws" : "confetti");
+		} else {
+			playWrong();
+		}
+
 		setFeedback({
 			correct,
 			nearMiss,
@@ -142,6 +178,8 @@ export function Session({
 
 	return (
 		<section className="session">
+			<Particles burst={burst} />
+
 			<header className="session__bar">
 				<button className="btn btn--ghost" type="button" onClick={onQuit}>
 					Salir
@@ -170,10 +208,14 @@ export function Session({
 						🔥 {streak}
 					</span>
 				)}
+
+				<SoundToggle compact />
 			</header>
 
 			<div className="session__stage">
-				<Kitten mood={mood} size={140} />
+				<div ref={kittenRef}>
+					<Kitten mood={mood} size={140} />
+				</div>
 
 				<span className="session__count">
 					{index + 1} / {exercises.length}
