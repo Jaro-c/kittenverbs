@@ -656,6 +656,13 @@
 	color: var(--bad);
 }
 
+/* The background cat sits at z-index 0, so the content has to claim a layer of
+   its own — otherwise a low-opacity cat can still end up drawn over a word. */
+.screen {
+	position: relative;
+	z-index: 1;
+}
+
 /* ─── Controls are for pressing, not for reading ───────────────────────────────
    Measured: double-clicking a button selects its label. On a phone a double tap
    then raises the selection callout on top of the very control she just pressed,
@@ -696,6 +703,10 @@
 	/* Phones with a home indicator eat the bottom strip; without this the labels
 	   sit under it and the last row of the bar is untappable. */
 	padding-bottom: env(safe-area-inset-bottom, 0);
+	/* A fixed height, not a minimum: --nav-h is what three other rules offset
+	   themselves against, so it has to be a fact. With min-height the items and
+	   the border pushed it to 66px and the background cat overlapped by 2. */
+	height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
 }
 
 .nav__item {
@@ -704,7 +715,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: 0.15rem;
-	min-height: 58px;
+	min-height: var(--nav-h);
 	padding: 0.4rem 0.2rem;
 	background: none;
 	border: none;
@@ -738,7 +749,7 @@
 
 /* Room for the bar so it never covers the last control on the page. */
 .app--nav {
-	padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px) + 1.25rem);
+	padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 1.25rem);
 }
 
 /* The milestone card is also pinned to the bottom, and it outranks the bar on
@@ -746,7 +757,7 @@
    every tap on the nav for the seven seconds it was up. Where there is a bar,
    the card sits on top of it instead of over it. */
 .app--nav .unlock {
-	bottom: calc(58px + env(safe-area-inset-bottom, 0px) + 0.75rem);
+	bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 0.75rem);
 }
 
 /* ─── Section pages ────────────────────────────────────────────────────────── */

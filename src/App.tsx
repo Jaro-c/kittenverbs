@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BackgroundCat } from "./components/BackgroundCat";
 import { BottomNav } from "./components/BottomNav";
 import { ConfirmDialog } from "./components/ConfirmDialog";
 import { Home } from "./components/Home";
@@ -313,6 +314,7 @@ export default function App() {
 	// ways out of a live round are Salir and the back gesture, and both ask first.
 	return (
 		<main className={`${shellClass} app--nav`}>
+			<BackgroundCat />
 			<Screen name={route}>{page()}</Screen>
 			<BottomNav current={route} onGo={(to) => navigate(to)} />
 			{overlays}

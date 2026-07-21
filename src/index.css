@@ -35,6 +35,11 @@
 	--cat-wool: #4f9dd4;
 	--cat-heart: #ff6b8a;
 
+	/* Height of the bottom bar. Three different places offset themselves against
+	   it (page padding, the milestone card, the background cat) and they were
+	   each guessing 58px while it actually measures 64. One token, measured. */
+	--nav-h: 64px;
+
 	--radius: 16px;
 	--shadow: 3px 3px 0 var(--line);
 	--shadow-lg: 5px 5px 0 var(--line);
