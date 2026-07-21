@@ -1,13 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { VERBS } from "../data/verbs";
-import type { AccessoryId } from "../lib/accessories";
 import { greeting } from "../lib/copy";
 import type { Progress } from "../lib/storage";
-import type { Pattern } from "../lib/types";
 import { KittenStage } from "./KittenStage";
 import { SoundToggle } from "./SoundToggle";
-import { SpeakButton } from "./SpeakButton";
-import { Trophies } from "./Trophies";
 import { WeekGoal } from "./WeekGoal";
 
 interface Props {
@@ -16,33 +12,28 @@ interface Props {
 	onPractice: (verbIds?: string[]) => void;
 	onExam: () => void;
 	onPet: (x: number, y: number) => void;
-	onWear: (accessory: AccessoryId | null) => void;
 	onReset: () => void;
 }
 
-const PATTERN_NOTE: Record<Pattern, string> = {
-	ABB: "pasado y participio iguales",
-	ABC: "las tres formas distintas",
-};
-
+/**
+ * Only what is worth a glance, plus the two buttons she came for.
+ *
+ * The verb table and the trophy case used to live here behind accordions, which
+ * meant unfolding and refolding them on every visit. They are destinations, so
+ * they became addresses; what stays is status she reads on the way past.
+ */
 export function Home({
 	progress,
 	weakIds,
 	onPractice,
 	onExam,
 	onPet,
-	onWear,
 	onReset,
 }: Props) {
-	const [tableOpen, setTableOpen] = useState(false);
-	const [pattern, setPattern] = useState<Pattern | "all">("all");
-
 	// Memoised because it reads the clock. Recomputing on every render would let
 	// the hello change under her mid-screen when the hour turns over, or worse,
 	// flip between two wordings on an unrelated re-render.
 	const hello = useMemo(() => greeting(progress), [progress]);
-
-	const shown = pattern === "all" ? VERBS : VERBS.filter((v) => v.pattern === pattern);
 	const seen = Object.keys(progress.verbs).length;
 
 	return (
@@ -59,7 +50,7 @@ export function Home({
 				<h1 className="home__title">Kitten Verbs</h1>
 				<p className="home__sub">{hello.line}</p>
 				<p className="home__meta">
-					15 verbos irregulares · infinitive · past · past participle
+					{VERBS.length} verbos irregulares · infinitive · past · past participle
 				</p>
 			</header>
 
@@ -93,14 +84,18 @@ export function Home({
 			<WeekGoal progress={progress} />
 
 			<div className="home__actions">
-				<button className="btn btn--primary btn--big" type="button" onClick={() => onPractice()}>
+				<button
+					className="btn btn--primary btn--big"
+					type="button"
+					onClick={() => onPractice()}
+				>
 					Practicar
-					<small>15 preguntas · escribir, elegir y completar</small>
+					<small>{VERBS.length} preguntas · escribir, elegir y completar</small>
 				</button>
 
 				<button className="btn btn--exam btn--big" type="button" onClick={onExam}>
 					Simulacro cronometrado
-					<small>15 preguntas · 7:30 · sin pistas ni opciones</small>
+					<small>{VERBS.length} preguntas · 7:30 · sin pistas ni opciones</small>
 				</button>
 
 				{weakIds.length > 0 && (
@@ -114,76 +109,6 @@ export function Home({
 							{weakIds.length} {weakIds.length === 1 ? "verbo" : "verbos"}
 						</small>
 					</button>
-				)}
-			</div>
-
-			<Trophies progress={progress} onWear={onWear} />
-
-			<div className="table-block">
-				<button
-					className="table-block__toggle"
-					type="button"
-					onClick={() => setTableOpen((open) => !open)}
-					aria-expanded={tableOpen}
-				>
-					{tableOpen ? "Ocultar" : "Ver"} la tabla completa
-				</button>
-
-				{tableOpen && (
-					<>
-						<div className="filters" role="group" aria-label="Filtrar por patrón">
-							{(["all", "ABB", "ABC"] as const).map((option) => (
-								<button
-									key={option}
-									type="button"
-									className={`filter${pattern === option ? " filter--on" : ""}`}
-									onClick={() => setPattern(option)}
-								>
-									{option === "all" ? "Todos" : option}
-									{option !== "all" && (
-										<small> · {PATTERN_NOTE[option]}</small>
-									)}
-								</button>
-							))}
-						</div>
-
-						<div className="table-scroll">
-							<table className="verb-table">
-								<thead>
-									<tr>
-										<th>Infinitive</th>
-										<th>Past</th>
-										<th>Past participle</th>
-										<th>Español</th>
-									</tr>
-								</thead>
-								<tbody>
-									{shown.map((verb) => (
-										<tr key={verb.id}>
-											<td>
-												<span className="verb-table__cell">
-													{verb.base}
-													<SpeakButton
-														words={[verb.base, verb.past, verb.participle]}
-														label={`${verb.base}, ${verb.past}, ${verb.participle}`}
-														size="sm"
-													/>
-												</span>
-											</td>
-											<td>{verb.past}</td>
-											<td>{verb.participle}</td>
-											<td className="verb-table__es">{verb.es}</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-
-						<p className="table-block__note">
-							Inglés americano. <b>spelled</b> es la forma de la evaluación;{" "}
-							<b>spelt</b> es británica y también se acepta al escribir.
-						</p>
-					</>
 				)}
 			</div>
 

@@ -7,6 +7,8 @@ import { AccessoryPicker } from "./AccessoryPicker";
 interface Props {
 	progress: Progress;
 	onWear: (accessory: AccessoryId | null) => void;
+	/** False on the page that exists only for this, where a toggle is a hurdle. */
+	collapsible?: boolean;
 }
 
 /**
@@ -17,14 +19,14 @@ interface Props {
  * condition rather than a row of question marks — a goal she can read is worth
  * something, a mystery is just noise.
  */
-export function Trophies({ progress, onWear }: Props) {
-	const [open, setOpen] = useState(false);
+export function Trophies({ progress, onWear, collapsible = true }: Props) {
+	const [open, setOpen] = useState(!collapsible);
 	const earned = new Set(progress.unlocked);
 	const count = ACHIEVEMENTS.filter((a) => earned.has(a.id)).length;
 
 	return (
 		<section className="trophies">
-			<button
+			{collapsible && <button
 				type="button"
 				className="trophies__toggle"
 				aria-expanded={open}
@@ -34,7 +36,7 @@ export function Trophies({ progress, onWear }: Props) {
 				<span className="trophies__count">
 					{count}/{ACHIEVEMENTS.length}
 				</span>
-			</button>
+			</button>}
 
 			{open && (
 				<>

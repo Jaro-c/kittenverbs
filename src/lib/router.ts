@@ -1,19 +1,41 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * A router in fifty lines, because this app has three addresses.
+ * A router in sixty lines, because this app has six addresses.
  *
  * The point is not pretty URLs, it is the back button: without history entries
  * the browser's back gesture — the main way anyone navigates on a phone — leaves
  * the site entirely from the middle of a round.
  */
-export type RouteName = "home" | "practice" | "exam";
+export type RouteName =
+	| "home"
+	| "practice"
+	| "exam"
+	| "verbs"
+	| "achievements"
+	| "records";
 
 const PATHS: Record<RouteName, string> = {
 	home: "/",
 	practice: "/practicar",
 	exam: "/simulacro",
+	verbs: "/verbos",
+	achievements: "/logros",
+	records: "/marcas",
 };
+
+/** Routes that are a place to be, and so appear in the navigation bar. */
+export const NAV: { route: RouteName; label: string }[] = [
+	{ route: "home", label: "Inicio" },
+	{ route: "verbs", label: "Verbos" },
+	{ route: "records", label: "Marcas" },
+	{ route: "achievements", label: "Logros" },
+];
+
+/** A round is running: the bar is hidden so she cannot wander out of it. */
+export function isSession(route: RouteName): boolean {
+	return route === "practice" || route === "exam";
+}
 
 const BY_PATH = new Map(
 	Object.entries(PATHS).map(([name, path]) => [path, name as RouteName]),

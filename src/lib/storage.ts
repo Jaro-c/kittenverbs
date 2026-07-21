@@ -27,6 +27,12 @@ export interface Progress {
 	bestExam: number | null;
 	/** Consecutive days with at least one session. */
 	streak: number;
+	/**
+	 * Longest streak ever reached. Kept separately because `streak` is destroyed
+	 * the first day she misses, and a record she can never lose is worth more on
+	 * a wall than one that resets.
+	 */
+	bestStreak: number;
 	/** Local ISO date (YYYY-MM-DD) of the last session, for streak math. */
 	lastDay: string | null;
 	/**
@@ -51,6 +57,7 @@ const EMPTY: Progress = {
 	goalPerDay: DEFAULT_GOAL_PER_DAY,
 	bestExam: null,
 	streak: 0,
+	bestStreak: 0,
 	lastDay: null,
 	answeredTotal: 0,
 	sessionsDone: 0,
@@ -75,6 +82,9 @@ export function loadProgress(): Progress {
 			goalPerDay: parsed.goalPerDay ?? DEFAULT_GOAL_PER_DAY,
 			bestExam: parsed.bestExam ?? null,
 			streak: parsed.streak ?? 0,
+			// Back-fills for anyone who already has progress saved from before
+			// this field existed: her current streak is the best one known.
+			bestStreak: parsed.bestStreak ?? parsed.streak ?? 0,
 			lastDay: parsed.lastDay ?? null,
 			answeredTotal: parsed.answeredTotal ?? 0,
 			sessionsDone: parsed.sessionsDone ?? 0,
@@ -184,6 +194,7 @@ export function recordSession(
 		days,
 		goalPerDay: progress.goalPerDay,
 		streak,
+		bestStreak: Math.max(progress.bestStreak, streak),
 		lastDay: day,
 		answeredTotal: progress.answeredTotal + results.length,
 		sessionsDone: progress.sessionsDone + 1,

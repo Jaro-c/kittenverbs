@@ -656,6 +656,204 @@
 	color: var(--bad);
 }
 
+/* ─── Bottom navigation ────────────────────────────────────────────────────── */
+
+.nav {
+	position: fixed;
+	inset-inline: 0;
+	bottom: 0;
+	z-index: 40;
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	background: var(--surface);
+	border-top: 2px solid var(--line);
+	/* Phones with a home indicator eat the bottom strip; without this the labels
+	   sit under it and the last row of the bar is untappable. */
+	padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.nav__item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.15rem;
+	min-height: 58px;
+	padding: 0.4rem 0.2rem;
+	background: none;
+	border: none;
+	color: var(--muted);
+	font-size: 0.7rem;
+	font-weight: 600;
+	transition: color 140ms ease;
+}
+
+.nav__item--on {
+	color: var(--brand);
+}
+
+.nav__icon {
+	font-size: 1.15rem;
+	line-height: 1;
+	/* The active tab is not signalled by colour alone: it also grows and sits on
+	   a tinted disc, which survives being colour-blind or on a washed-out screen. */
+	display: grid;
+	place-items: center;
+	width: 30px;
+	height: 30px;
+	border-radius: 999px;
+	transition: background-color 140ms ease, transform 140ms ease;
+}
+
+.nav__item--on .nav__icon {
+	background: var(--brand-tint);
+	transform: scale(1.12);
+}
+
+/* Room for the bar so it never covers the last control on the page. */
+.app--nav {
+	padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px) + 1.25rem);
+}
+
+/* The milestone card is also pinned to the bottom, and it outranks the bar on
+   z-index. Measured with a real click: parked at its usual offset it swallowed
+   every tap on the nav for the seven seconds it was up. Where there is a bar,
+   the card sits on top of it instead of over it. */
+.app--nav .unlock {
+	bottom: calc(58px + env(safe-area-inset-bottom, 0px) + 0.75rem);
+}
+
+/* ─── Section pages ────────────────────────────────────────────────────────── */
+
+.page {
+	display: flex;
+	flex-direction: column;
+	gap: 1.1rem;
+}
+
+.page--empty {
+	align-items: center;
+	text-align: center;
+	gap: 0.9rem;
+}
+
+.page__head {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.page__title {
+	font-size: clamp(1.7rem, 6vw, 2.2rem);
+}
+
+.page__sub {
+	color: var(--muted);
+	font-size: 0.95rem;
+}
+
+.page__count,
+.page__note {
+	font-size: 0.82rem;
+	color: var(--muted);
+}
+
+/* ─── Records ──────────────────────────────────────────────────────────────── */
+
+.records {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	gap: 0.65rem;
+}
+
+.record {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.1rem;
+	padding: 0.85rem 0.6rem;
+	background: var(--surface);
+	border: 2px solid var(--line);
+	border-radius: 12px;
+	box-shadow: var(--shadow);
+	text-align: center;
+}
+
+.record__value {
+	font-size: 1.45rem;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+}
+
+.record__label {
+	font-size: 0.75rem;
+	color: var(--muted);
+}
+
+.ranking {
+	display: flex;
+	flex-direction: column;
+	gap: 0.7rem;
+	padding: 1rem 1.1rem;
+	background: var(--surface);
+	border: 2px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+}
+
+.ranking__title {
+	font-size: 0.78rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--muted);
+}
+
+.ranking__list {
+	list-style: none;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.55rem;
+}
+
+.ranking__row {
+	display: grid;
+	grid-template-columns: minmax(7.5rem, auto) 1fr 3rem;
+	align-items: center;
+	gap: 0.6rem;
+}
+
+.ranking__verb {
+	display: inline-flex;
+	align-items: center;
+	font-weight: 700;
+}
+
+.ranking__bar {
+	height: 10px;
+	background: var(--surface-sunk);
+	border: 2px solid var(--line);
+	border-radius: 999px;
+	overflow: hidden;
+}
+
+.ranking__fill {
+	display: block;
+	height: 100%;
+	background: var(--ok);
+}
+
+.ranking__fill--weak {
+	background: var(--bad);
+}
+
+.ranking__pct {
+	font-variant-numeric: tabular-nums;
+	font-weight: 700;
+	text-align: end;
+	font-size: 0.9rem;
+}
+
 /* ─── Confirm dialog ───────────────────────────────────────────────────────── */
 
 .confirm {

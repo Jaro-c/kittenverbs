@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BottomNav } from "./components/BottomNav";
 import { ConfirmDialog } from "./components/ConfirmDialog";
 import { Home } from "./components/Home";
+import { RecordsPage } from "./components/RecordsPage";
 import { Particles, type Burst, type BurstKind } from "./components/Particles";
 import { Results } from "./components/Results";
 import { Screen } from "./components/Screen";
 import { Session } from "./components/Session";
+import { Trophies } from "./components/Trophies";
 import { UnlockToast } from "./components/UnlockToast";
+import { VerbsPage } from "./components/VerbsPage";
 import type { AccessoryId } from "./lib/accessories";
 import { syncAchievements, type Achievement } from "./lib/achievements";
 import { buildSession } from "./lib/exercises";
-import { useRouter, type RouteName } from "./lib/router";
+import { isSession, useRouter, type RouteName } from "./lib/router";
 import {
 	loadProgress,
 	recordPet,
@@ -56,8 +60,9 @@ export default function App() {
 	liveRef.current = live;
 
 	const guard = useCallback((from: RouteName, to: RouteName) => {
-		if (from === "home" || !liveRef.current) return true;
+		void from;
 		void to;
+		if (!liveRef.current) return true;
 		setPrompt("leave");
 		return false;
 	}, []);
@@ -115,7 +120,7 @@ export default function App() {
 	 * fresh round rather than trying to resurrect something that never existed.
 	 */
 	useEffect(() => {
-		if (route === "home") {
+		if (!isSession(route)) {
 			setSession(null);
 			setOutcome(null);
 			setAnswered(0);
@@ -303,20 +308,48 @@ export default function App() {
 		);
 	}
 
+	// Everything below is a place she can be, so it all gets the nav bar. The two
+	// session screens above return before this and deliberately do not: the only
+	// ways out of a live round are Salir and the back gesture, and both ask first.
 	return (
-		<main className={shellClass}>
-			<Screen name="home">
-				<Home
-					progress={progress}
-					weakIds={weakIds}
-					onPractice={(verbIds) => start("practice", verbIds)}
-					onExam={() => start("exam")}
-					onPet={pet}
-					onWear={wear}
-					onReset={() => setPrompt("reset")}
-				/>
-			</Screen>
+		<main className={`${shellClass} app--nav`}>
+			<Screen name={route}>{page()}</Screen>
+			<BottomNav current={route} onGo={(to) => navigate(to)} />
 			{overlays}
 		</main>
 	);
+
+	function page() {
+		if (route === "verbs") return <VerbsPage />;
+		if (route === "achievements")
+			return (
+				<section className="page">
+					<header className="page__head">
+						<h1 className="page__title">Logros</h1>
+						<p className="page__sub">
+							Y el clóset: elige qué le pones al gatito.
+						</p>
+					</header>
+					<Trophies progress={progress} onWear={wear} collapsible={false} />
+				</section>
+			);
+		if (route === "records")
+			return (
+				<RecordsPage
+					progress={progress}
+					onPet={pet}
+					onPractice={(verbIds) => start("practice", verbIds)}
+				/>
+			);
+		return (
+			<Home
+				progress={progress}
+				weakIds={weakIds}
+				onPractice={(verbIds) => start("practice", verbIds)}
+				onExam={() => start("exam")}
+				onPet={pet}
+				onReset={() => setPrompt("reset")}
+			/>
+		);
+	}
 }
