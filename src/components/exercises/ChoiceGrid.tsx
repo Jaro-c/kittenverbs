@@ -1,4 +1,5 @@
 import { FIELD_LABEL } from "../../lib/exercises";
+import { SpeakButton } from "../SpeakButton";
 import type { ChoiceExercise } from "../../lib/types";
 
 interface Props {
@@ -29,7 +30,10 @@ export function ChoiceGrid({
 				<span className="exercise__clue-label">
 					{FIELD_LABEL[exercise.given]}
 				</span>
-				<span className="exercise__clue-value">{clue}</span>
+				<span className="exercise__clue-value">
+					{clue}
+					{exercise.given !== "es" && <SpeakButton words={[clue]} size="sm" />}
+				</span>
 			</p>
 
 			<div className="choices">

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FIELD_LABEL } from "../../lib/exercises";
+import { SpeakButton } from "../SpeakButton";
 import type { TypeExercise } from "../../lib/types";
 
 interface Props {
@@ -38,7 +39,15 @@ export function TypeAnswer({ exercise, locked, onSubmit }: Props) {
 				<span className="exercise__clue-label">
 					{FIELD_LABEL[exercise.given]}
 				</span>
-				<span className="exercise__clue-value">{clue}</span>
+				<span className="exercise__clue-value">
+					{clue}
+					{/* Only the English columns get a speaker, and only because the clue
+					    is already on screen — reading out a form she has not produced
+					    yet would hand her the answer. */}
+					{exercise.given !== "es" && (
+						<SpeakButton words={[clue]} size="sm" />
+					)}
+				</span>
 			</p>
 
 			<input

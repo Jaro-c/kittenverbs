@@ -656,6 +656,61 @@
 	color: var(--bad);
 }
 
+/* ─── Speak button ─────────────────────────────────────────────────────────────
+   Sits beside English text she can already see. Never beside an answer she has
+   not given yet, which would read it out loud. */
+
+.speak {
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	background: transparent;
+	border: 2px solid var(--line-soft);
+	border-radius: 50%;
+	color: var(--brand);
+	padding: 0;
+	transition: border-color 140ms ease, background-color 140ms ease;
+	vertical-align: middle;
+}
+
+.speak svg {
+	width: 58%;
+	height: 58%;
+	fill: currentColor;
+}
+
+.speak__wave {
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+}
+
+.speak:hover {
+	border-color: var(--brand);
+	background: var(--brand-tint);
+}
+
+/* 44px is the smallest a finger reliably hits; the small variant keeps that as
+   its tap target and only shrinks what is drawn inside. */
+.speak--md {
+	width: 44px;
+	height: 44px;
+}
+
+.speak--sm {
+	width: 44px;
+	height: 44px;
+	border-color: transparent;
+	margin-inline-start: 0.35rem;
+}
+
+.verb-table__cell {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.1rem;
+}
+
 /* ─── Particles ────────────────────────────────────────────────────────────────
    A fixed overlay that must never intercept a click; the buttons underneath stay
    fully usable while confetti is still falling over them. */

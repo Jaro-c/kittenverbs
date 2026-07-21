@@ -7,6 +7,7 @@ import { playFinish } from "../lib/sound";
 import type { Attempt, SessionMode } from "../lib/types";
 import { KittenStage } from "./KittenStage";
 import type { BurstKind } from "./Particles";
+import { SpeakButton } from "./SpeakButton";
 
 interface Props {
 	attempts: Attempt[];
@@ -80,7 +81,16 @@ export function Results({
 							const verb = getVerb(attempt.verbId);
 							return (
 								<li className="miss" key={`${attempt.exerciseId}-${i}`}>
-									<span className="miss__verb">{verb?.base}</span>
+									<span className="miss__verb">
+										{verb?.base}
+										{verb && (
+											<SpeakButton
+												words={[verb.base, verb.past, verb.participle]}
+												label={`${verb.base}, ${verb.past}, ${verb.participle}`}
+												size="sm"
+											/>
+										)}
+									</span>
 									<span className="miss__detail">
 										{attempt.ask.map((field, j) => (
 											<span key={field}>

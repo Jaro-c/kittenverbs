@@ -6,6 +6,7 @@ import type { Progress } from "../lib/storage";
 import type { Pattern } from "../lib/types";
 import { KittenStage } from "./KittenStage";
 import { SoundToggle } from "./SoundToggle";
+import { SpeakButton } from "./SpeakButton";
 import { Trophies } from "./Trophies";
 import { WeekGoal } from "./WeekGoal";
 
@@ -159,7 +160,16 @@ export function Home({
 								<tbody>
 									{shown.map((verb) => (
 										<tr key={verb.id}>
-											<td>{verb.base}</td>
+											<td>
+												<span className="verb-table__cell">
+													{verb.base}
+													<SpeakButton
+														words={[verb.base, verb.past, verb.participle]}
+														label={`${verb.base}, ${verb.past}, ${verb.participle}`}
+														size="sm"
+													/>
+												</span>
+											</td>
 											<td>{verb.past}</td>
 											<td>{verb.participle}</td>
 											<td className="verb-table__es">{verb.es}</td>
