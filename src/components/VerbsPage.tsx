@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { VERBS } from "../data/verbs";
 import type { Pattern } from "../lib/types";
+import { withViewTransition } from "../lib/viewTransition";
 import { SpeakButton } from "./SpeakButton";
 
 const PATTERN_NOTE: Record<Pattern, string> = {
@@ -35,7 +36,11 @@ export function VerbsPage() {
 						type="button"
 						className={`filter${pattern === option ? " filter--on" : ""}`}
 						aria-pressed={pattern === option}
-						onClick={() => setPattern(option)}
+						// Seven rows leaving at once used to be a jump cut. The browser
+						// cross-fades the two tables for us; no list library, no keys to
+						// reconcile, and where the API is missing it is still the same
+						// instant swap it always was.
+						onClick={() => withViewTransition("swap", () => setPattern(option))}
 					>
 						{option === "all" ? "Todos" : option}
 						{option !== "all" && <small> · {PATTERN_NOTE[option]}</small>}
@@ -58,8 +63,12 @@ export function VerbsPage() {
 						</tr>
 					</thead>
 					<tbody>
-						{shown.map((verb) => (
-							<tr key={verb.id}>
+						{shown.map((verb, i) => (
+							// The row's place in the list, handed to CSS as a number so the
+							// stagger is one declaration instead of fifteen. Capped in the
+							// stylesheet, not here: a row's index is a fact, how long the
+							// sweep is allowed to take is a design decision.
+							<tr key={verb.id} style={{ "--i": i } as CSSProperties}>
 								<td>
 									<span className="verb-table__cell">
 										{verb.base}

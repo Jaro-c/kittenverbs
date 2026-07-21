@@ -33,9 +33,11 @@
 	font-size: 1rem;
 	box-shadow: var(--shadow);
 	transition:
-		transform 120ms ease,
-		box-shadow 120ms ease,
-		background-color 120ms ease;
+		transform var(--t-tap) var(--ease-out),
+		box-shadow var(--t-tap) var(--ease-out),
+		background-color var(--t-tap) var(--ease-out),
+		border-color var(--t-tap) var(--ease-out),
+		color var(--t-tap) var(--ease-out);
 }
 
 .btn small {
@@ -227,6 +229,23 @@
 	color: var(--muted);
 }
 
+.filter {
+	transition:
+		background-color var(--t-ui) var(--ease-out),
+		border-color var(--t-ui) var(--ease-out),
+		transform var(--t-tap) var(--ease-out);
+}
+
+.filter:hover {
+	border-color: var(--brand);
+}
+
+/* Every control in this app sinks when pressed. The chips were the one group
+   that did not, which made them feel like labels rather than buttons. */
+.filter:active {
+	transform: translateY(1px);
+}
+
 .filter--on {
 	background: var(--brand-tint);
 	border-color: var(--brand);
@@ -310,7 +329,7 @@
 	height: 100%;
 	background: var(--brand);
 	border-radius: 999px;
-	transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+	transition: width var(--t-page) var(--ease-out);
 }
 
 .streak,
@@ -358,6 +377,85 @@
 	border: 2px solid var(--line);
 	border-radius: var(--radius);
 	box-shadow: var(--shadow-lg);
+}
+
+/* ─── The card answering back ──────────────────────────────────────────────────
+   This is where she spends the whole session, and until now right and wrong
+   differed almost only in hue — the one channel that a colour-blind eye, a
+   sun-washed phone and a glance away from the screen all lose first.
+
+   Both reactions are pure `transform`, which is not a style preference: it is
+   the only thing that can be handed to the compositor. `left`, `width` or
+   `margin` here would relayout the card — and everything under it — on every
+   frame, fifteen times a round, on her phone.
+
+   Neither can fire in the simulacro. The class comes from a Feedback object
+   that exam mode never builds, so the guarantee is structural rather than a
+   condition somebody has to remember. */
+
+.exercise--right {
+	border-color: var(--ok);
+	animation: card-hop var(--t-react) var(--ease-spring);
+}
+
+.exercise--wrong {
+	border-color: var(--bad);
+	animation: card-knock var(--t-react) var(--ease-out);
+}
+
+/* A hop, not a flash: the card lifts off the hard shadow it normally sits on and
+   drops back. It borrows the app's own press gesture and plays it backwards,
+   which is why it reads as "yes" and not as a generic pop. */
+@keyframes card-hop {
+	0% {
+		transform: none;
+	}
+	38% {
+		transform: translateY(-7px) scale(1.014);
+	}
+	100% {
+		transform: none;
+	}
+}
+
+/* Four decaying knocks. The amplitude has to fall away or it reads as an error
+   dialog scolding her — this is a study app, and she is going to be wrong a lot
+   on purpose. */
+@keyframes card-knock {
+	0%,
+	100% {
+		transform: none;
+	}
+	18% {
+		transform: translateX(-9px);
+	}
+	38% {
+		transform: translateX(7px);
+	}
+	58% {
+		transform: translateX(-4px);
+	}
+	80% {
+		transform: translateX(2px);
+	}
+}
+
+/* The option she should have picked, arriving rather than simply being green. */
+.choice--correct {
+	animation: card-hop var(--t-react) var(--ease-spring);
+}
+
+/* The streak counter is re-keyed in JSX when the number moves, so this replays
+   on its own. Only upward: a streak breaking already has the whole card
+   knocking, and a second thing jumping at that moment is piling on. */
+.streak--up {
+	animation: streak-tick var(--t-ui) var(--ease-spring);
+}
+
+@keyframes streak-tick {
+	from {
+		transform: scale(1.28);
+	}
 }
 
 .exercise__instruction {
@@ -424,8 +522,10 @@
 	border-radius: 12px;
 	font-weight: 700;
 	transition:
-		transform 120ms ease,
-		background-color 140ms ease;
+		transform var(--t-tap) var(--ease-out),
+		background-color var(--t-ui) var(--ease-out),
+		border-color var(--t-ui) var(--ease-out),
+		color var(--t-ui) var(--ease-out);
 }
 
 .choice:hover:not(:disabled) {
@@ -445,8 +545,16 @@
 	color: var(--bad);
 }
 
+/* Held back with COLOUR, not with opacity — the same rule the trophy list
+   already documents, applied to the one place that was still breaking it.
+   Measured at opacity 0.4: the label sat at 2.39:1 in the light theme, under the
+   4.5 floor, and the check passed on paper because a computed style still
+   reports the undimmed colour. A muted foreground on the sunk surface reads as
+   just as far back and can be measured honestly. */
 .choice--muted {
-	opacity: 0.4;
+	color: var(--muted);
+	border-color: var(--line-soft);
+	background: var(--surface-sunk);
 }
 
 /* ─── Row exercise ─────────────────────────────────────────────────────────── */
@@ -515,7 +623,7 @@
 	border: 2px solid var(--line);
 	border-radius: var(--radius);
 	box-shadow: var(--shadow-lg);
-	animation: slide-up 220ms cubic-bezier(0.22, 1, 0.36, 1);
+	animation: slide-up var(--t-ui) var(--ease-out);
 }
 
 @keyframes slide-up {
@@ -729,7 +837,7 @@
 	color: var(--muted);
 	font-size: 0.7rem;
 	font-weight: 600;
-	transition: color 140ms ease;
+	transition: color var(--t-ui) var(--ease-out);
 }
 
 .nav__item--on {
@@ -746,7 +854,9 @@
 	width: 30px;
 	height: 30px;
 	border-radius: 999px;
-	transition: background-color 140ms ease, transform 140ms ease;
+	transition:
+		background-color var(--t-ui) var(--ease-out),
+		transform var(--t-ui) var(--ease-spring);
 }
 
 .nav__item--on .nav__icon {
@@ -823,10 +933,27 @@
 	text-align: center;
 }
 
+/* Tabular figures are not decoration here, they are the whole reason the count
+   is watchable: with proportional digits a 1 is narrower than an 8, so a number
+   climbing from 0 to 137 jitters sideways for the entire 700ms. */
 .record__value {
 	font-size: 1.45rem;
 	font-weight: 800;
 	letter-spacing: -0.02em;
+	font-variant-numeric: tabular-nums;
+}
+
+.record,
+.stat {
+	transition:
+		transform var(--t-ui) var(--ease-out),
+		box-shadow var(--t-ui) var(--ease-out);
+}
+
+.record:hover,
+.stat:hover {
+	transform: translate(-1px, -1px);
+	box-shadow: var(--shadow-lg);
 }
 
 .record__label {
@@ -911,8 +1038,53 @@
 	box-shadow: var(--shadow-lg);
 }
 
+/* The dialog arrives and LEAVES, both natively.
+   A <dialog> is display:none when closed, and display was never animatable — so
+   every hand-rolled modal in the world keeps a timer alive to delay the unmount.
+   `transition-behavior: allow-discrete` plus `@starting-style` removes the
+   premise: the browser holds the element in the top layer for the length of the
+   transition and then drops it. Nothing here knows the dialog is closing;
+   ConfirmDialog still just calls close().
+   Where the syntax is not understood the two rules are dropped and the dialog
+   appears and disappears exactly as it did before. */
+.confirm {
+	opacity: 0;
+	transform: translateY(10px) scale(0.98);
+	transition:
+		opacity var(--t-ui) var(--ease-out),
+		transform var(--t-ui) var(--ease-out),
+		overlay var(--t-ui) allow-discrete,
+		display var(--t-ui) allow-discrete;
+}
+
+.confirm[open] {
+	opacity: 1;
+	transform: none;
+}
+
+@starting-style {
+	.confirm[open] {
+		opacity: 0;
+		transform: translateY(10px) scale(0.98);
+	}
+}
+
 .confirm::backdrop {
+	background: rgb(0 0 0 / 0);
+	transition:
+		background-color var(--t-ui) var(--ease-out),
+		overlay var(--t-ui) allow-discrete,
+		display var(--t-ui) allow-discrete;
+}
+
+.confirm[open]::backdrop {
 	background: rgb(0 0 0 / 0.45);
+}
+
+@starting-style {
+	.confirm[open]::backdrop {
+		background: rgb(0 0 0 / 0);
+	}
 }
 
 .confirm__title {
@@ -960,7 +1132,9 @@
 	border-radius: 50%;
 	color: var(--brand);
 	padding: 0;
-	transition: border-color 140ms ease, background-color 140ms ease;
+	transition:
+		border-color var(--t-ui) var(--ease-out),
+		background-color var(--t-ui) var(--ease-out);
 	vertical-align: middle;
 }
 
@@ -1029,7 +1203,9 @@
 	font-size: 0.85rem;
 	font-weight: 600;
 	color: var(--muted);
-	transition: border-color 140ms ease, color 140ms ease;
+	transition:
+		border-color var(--t-ui) var(--ease-out),
+		color var(--t-ui) var(--ease-out);
 }
 
 .sound-toggle:hover {
@@ -1134,6 +1310,16 @@
 	gap: 0.5rem;
 }
 
+/* Sound and vibration side by side, wrapping to one column when the second one
+   exists and the screen is narrow. On a laptop the row holds a single child and
+   looks exactly as it always did. */
+.home__switches {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.5rem;
+}
+
 /* Visible to a screen reader, not to the eye. */
 .sr-only {
 	position: absolute;
@@ -1169,7 +1355,43 @@
 	color: var(--text);
 }
 
+.trophies__toggle {
+	transition:
+		border-color var(--t-ui) var(--ease-out),
+		background-color var(--t-ui) var(--ease-out),
+		transform var(--t-tap) var(--ease-out);
+}
+
 .trophies__toggle:hover {
+	border-color: var(--brand);
+	background: var(--surface-sunk);
+}
+
+/* Same press as everything else. Three controls in this app used to be the only
+   ones that did not move under a finger, which is exactly how an interface ends
+   up feeling "almost right" without anyone being able to say why. */
+.trophies__toggle:active,
+.sound-toggle:active,
+.wardrobe__option:active,
+.speak:active {
+	transform: translateY(1px);
+}
+
+.sound-toggle,
+.speak {
+	transition-property: border-color, background-color, color, transform;
+	transition-duration: var(--t-ui);
+	transition-timing-function: var(--ease-out);
+}
+
+.wardrobe__option {
+	transition:
+		border-color var(--t-ui) var(--ease-out),
+		background-color var(--t-ui) var(--ease-out),
+		transform var(--t-tap) var(--ease-out);
+}
+
+.wardrobe__option:hover {
 	border-color: var(--brand);
 }
 
@@ -1278,7 +1500,9 @@
 	font-size: 0.78rem;
 	font-weight: 600;
 	color: var(--muted);
-	transition: border-color 140ms ease, background-color 140ms ease;
+	transition:
+		border-color var(--t-ui) var(--ease-out),
+		background-color var(--t-ui) var(--ease-out);
 }
 
 .wardrobe__option--on {
@@ -1317,7 +1541,7 @@
 	border: 2px solid var(--line);
 	border-radius: var(--radius);
 	box-shadow: var(--shadow-lg);
-	animation: unlock-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+	animation: unlock-in var(--t-page) var(--ease-spring) both;
 }
 
 @keyframes unlock-in {
@@ -1373,10 +1597,24 @@
 	font-size: 0.88rem;
 }
 
-/* ─── Screen change ────────────────────────────────────────────────────────── */
+/* ─── Screen change ────────────────────────────────────────────────────────────
+   Two implementations of one idea, and never both at once.
+
+   The fallback: a keyframe on the incoming screen, which is all a browser
+   without the View Transitions API can do — the outgoing screen is already gone
+   by the time React hands us anything to animate.
+
+   The real one: the browser cross-fades its own before-and-after photographs,
+   so the old screen genuinely leaves instead of disappearing. viewTransition.ts
+   stamps data-view-transitions on <html> when that path is live, and the
+   keyframe below stands down so the two do not play on top of each other. */
 
 .screen {
-	animation: screen-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+	animation: screen-in var(--t-page) var(--ease-out) both;
+}
+
+:root[data-view-transitions="on"] .screen {
+	animation: none;
 }
 
 @keyframes screen-in {
@@ -1387,6 +1625,174 @@
 	to {
 		opacity: 1;
 		transform: none;
+	}
+}
+
+/* ─── View transitions ─────────────────────────────────────────────────────────
+   Two speeds, because the motion rule cuts here as hard as anywhere: changing
+   address is a journey and gets a push; swapping a filter is an answer to a tap
+   and gets a fade half as long with no movement at all. Sliding the whole page
+   for a filter chip is indistinguishable from lag. */
+
+:root[data-vt="page"]::view-transition-old(root) {
+	animation: vt-leave var(--t-page) var(--ease-in) both;
+}
+
+:root[data-vt="page"]::view-transition-new(root) {
+	animation: vt-enter var(--t-page) var(--ease-out) both;
+}
+
+:root[data-vt="swap"]::view-transition-old(root) {
+	animation: vt-fade-out var(--t-ui) var(--ease-in) both;
+}
+
+:root[data-vt="swap"]::view-transition-new(root) {
+	animation: vt-fade-in var(--t-ui) var(--ease-out) both;
+}
+
+@keyframes vt-leave {
+	to {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+}
+
+@keyframes vt-enter {
+	from {
+		opacity: 0;
+		transform: translateY(14px);
+	}
+}
+
+@keyframes vt-fade-out {
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes vt-fade-in {
+	from {
+		opacity: 0;
+	}
+}
+
+/* What survives the cut.
+
+   Naming an element lifts it out of the page-wide cross-fade and gives it its
+   own pair of snapshots, which the browser then moves and resizes between the
+   two positions. These two earn it: the bar is furniture and furniture does not
+   blink when you walk into the next room, and the cat is the app — it should
+   walk from the home screen into the round rather than dying and being reborn
+   one pixel to the left.
+
+   Exactly one of each may exist at a time or the browser aborts the whole
+   transition. Verified: the bar is absent during a round by design, and the
+   stage is rendered once per screen — the wardrobe previews draw <Kitten>
+   directly and are deliberately not named. */
+.nav {
+	view-transition-name: navbar;
+}
+
+.kitten-stage-wrap {
+	view-transition-name: kitten;
+}
+
+/* The cat crosses screens in one unhurried move while the pages themselves
+   hurry. It is the only element in the app allowed to be slower than the screen
+   it sits on. */
+::view-transition-group(kitten) {
+	animation-duration: calc(var(--t-page) * 1.3);
+	animation-timing-function: var(--ease-out);
+}
+
+::view-transition-group(navbar) {
+	animation-duration: var(--t-page);
+	animation-timing-function: var(--ease-out);
+}
+
+/* The JS path already refuses to start a transition under the preference, which
+   is the real fix — a media query cannot un-capture a snapshot. This is the belt
+   to that pair of braces, for a preference flipped while a transition is already
+   in flight. Duration, never `animation: none`: removing the animation outright
+   can leave the outgoing snapshot painted over the page forever. */
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation-duration: 1ms !important;
+		animation-delay: 0ms !important;
+	}
+}
+
+/* ─── Arrivals ─────────────────────────────────────────────────────────────────
+   Two mechanisms, split by where the thing is when the page lands.
+
+   ABOVE THE FOLD: a stagger on mount. The index arrives as --i from JSX and the
+   delay is derived, so the sweep is one rule rather than one rule per row. The
+   step is capped at eight: a fifteen-row table staggered all the way through
+   spends 390ms on its last row, and the last row is exactly where impatience
+   lives. Past the eighth, everything lands together.
+
+   BELOW THE FOLD: nothing at all, until it scrolls in — and that is done by the
+   browser's own scroll timeline, with no IntersectionObserver, no scroll
+   listener and no JavaScript of any kind. There is a real trap here and it is
+   the reason for the two nested at-rules: a scroll-driven animation takes its
+   progress from the scroller, NOT from animation-duration, so the blunt
+   `animation-duration: 0.01ms` override further down cannot touch it. An element
+   revealed this way would sit at opacity 0 forever for exactly the person who
+   asked for less movement. So the whole mechanism is fenced inside
+   `no-preference`, and outside it the elements are simply visible — which is
+   also what a browser without view() timelines gets, since @supports is doing
+   the same job for capability that the media query is doing for preference. */
+
+.reveal-step {
+	animation: step-in var(--t-page) var(--ease-out) both;
+	animation-delay: calc(min(var(--i, 0), 8) * var(--t-step));
+}
+
+@keyframes step-in {
+	from {
+		opacity: 0;
+		transform: translateY(9px);
+	}
+}
+
+.verb-table tbody tr {
+	animation: step-in var(--t-page) var(--ease-out) both;
+	animation-delay: calc(min(var(--i, 0), 8) * var(--t-step));
+}
+
+@supports (animation-timeline: view()) {
+	@media (prefers-reduced-motion: no-preference) {
+		.reveal {
+			animation-name: reveal-in;
+			/* `auto`, and it has to be spelled out: the `animation` shorthand would
+			   write 0s here, and a scroll-driven animation with an explicit zero
+			   duration is not a reveal, it is an element that never appears. `auto`
+			   is what hands the timing over to the range below. */
+			animation-duration: auto;
+			animation-timing-function: linear;
+			animation-fill-mode: both;
+			animation-timeline: view();
+			/* The range has to END somewhere the scroll can actually REACH, and
+			   this is the part that is easy to get wrong. Measured with `cover 20%`
+			   as the end: the last block on /marcas settled at opacity 0.87 on a
+			   phone and 0.74 on a desktop and stayed there, because an element near
+			   the foot of the page never travels far enough through the `cover`
+			   range — the page runs out of scroll first. Permanently translucent
+			   text is a contrast failure that no amount of scrolling can clear.
+			   `entry` completes as soon as the element is fully on screen, which is
+			   a state every element in this app does reach. Ending at 75% of it
+			   means the movement is over before she has finished reading it. */
+			animation-range: entry 0% entry 75%;
+		}
+	}
+}
+
+@keyframes reveal-in {
+	from {
+		opacity: 0;
+		transform: translateY(22px);
 	}
 }
 

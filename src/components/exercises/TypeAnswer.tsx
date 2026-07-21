@@ -2,14 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import { FIELD_LABEL } from "../../lib/exercises";
 import { SpeakButton } from "../SpeakButton";
 import type { TypeExercise } from "../../lib/types";
+import type { Reaction } from "../../lib/reaction";
+import { reactionClass } from "../../lib/reaction";
 
 interface Props {
 	exercise: TypeExercise;
 	locked: boolean;
 	onSubmit: (answers: string[]) => void;
+	/** Null in the exam, always: the card must not twitch either. */
+	reaction: Reaction;
 }
 
-export function TypeAnswer({ exercise, locked, onSubmit }: Props) {
+export function TypeAnswer({ exercise, locked, onSubmit, reaction }: Props) {
 	const [value, setValue] = useState("");
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -24,7 +28,7 @@ export function TypeAnswer({ exercise, locked, onSubmit }: Props) {
 
 	return (
 		<form
-			className="exercise"
+			className={`exercise${reactionClass(reaction)}`}
 			onSubmit={(event) => {
 				event.preventDefault();
 				if (locked || value.trim() === "") return;

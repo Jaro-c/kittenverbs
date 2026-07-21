@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { ACHIEVEMENTS, unlockedAccessories } from "../lib/achievements";
 import { getAccessory, type AccessoryId } from "../lib/accessories";
 import type { Progress } from "../lib/storage";
+import { withViewTransition } from "../lib/viewTransition";
 import { AccessoryPicker } from "./AccessoryPicker";
 
 interface Props {
@@ -30,7 +31,13 @@ export function Trophies({ progress, onWear, collapsible = true }: Props) {
 				type="button"
 				className="trophies__toggle"
 				aria-expanded={open}
-				onClick={() => setOpen((current) => !current)}
+				// The closet used to appear and vanish on the same frame. This is the
+				// one thing the browser will now do for free: the same cross-fade the
+				// pages use, at half the length, because opening a drawer answers a
+				// tap rather than going somewhere.
+				onClick={() =>
+					withViewTransition("swap", () => setOpen((current) => !current))
+				}
 			>
 				{open ? "Ocultar" : "Ver"} logros y accesorios
 				<span className="trophies__count">
@@ -41,13 +48,14 @@ export function Trophies({ progress, onWear, collapsible = true }: Props) {
 			{open && (
 				<>
 					<ul className="trophies__list">
-						{ACHIEVEMENTS.map((achievement) => {
+						{ACHIEVEMENTS.map((achievement, i) => {
 							const done = earned.has(achievement.id);
 							const prize = getAccessory(achievement.grants ?? null);
 							return (
 								<li
 									key={achievement.id}
-									className={`trophy${done ? " trophy--done" : ""}`}
+									className={`trophy reveal-step${done ? " trophy--done" : ""}`}
+									style={{ "--i": i } as CSSProperties}
 								>
 									<span className="trophy__mark" aria-hidden="true">
 										{done ? "🐾" : "·"}

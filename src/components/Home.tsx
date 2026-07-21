@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { VERBS } from "../data/verbs";
 import { greeting } from "../lib/copy";
 import type { Progress } from "../lib/storage";
+import { HapticsToggle } from "./HapticsToggle";
 import { KittenStage } from "./KittenStage";
 import { SoundToggle } from "./SoundToggle";
 import { WeekGoal } from "./WeekGoal";
@@ -113,7 +114,12 @@ export function Home({
 			</div>
 
 			<footer className="home__foot">
-				<SoundToggle />
+				<div className="home__switches">
+					<SoundToggle />
+					{/* Renders nothing where the browser cannot vibrate, so this row is
+					    one control on a laptop and two on an Android phone. */}
+					<HapticsToggle />
+				</div>
 				{seen > 0 && (
 					<button className="link-reset" type="button" onClick={onReset}>
 						Borrar mi progreso

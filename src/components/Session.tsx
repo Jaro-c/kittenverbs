@@ -3,6 +3,8 @@ import type { AccessoryId } from "../lib/accessories";
 import { canonicalAnswer, isCorrect, isNearMiss } from "../lib/check";
 import { missLine, praiseLine } from "../lib/copy";
 import { FIELD_LABEL } from "../lib/exercises";
+import { buzzCorrect, buzzWrong } from "../lib/haptics";
+import type { Reaction } from "../lib/reaction";
 import type { Attempt, Exercise, Field, SessionMode } from "../lib/types";
 import {
 	playCorrect,
@@ -155,6 +157,13 @@ export function Session({
 		// would stop meaning anything. Audio has to honour the same rule — a
 		// rising chime after every right answer would announce the score one
 		// question at a time, so the exam gets a neutral tick and nothing else.
+		//
+		// The same applies to the phone in her hand. A buzz she can tell apart
+		// from another buzz is a channel exactly like sound or colour, and a
+		// silent phone in a quiet exam room is the channel MOST likely to be the
+		// one still being read. This early return is the single gate: every
+		// reaction added below it — feedback, particles, the card's knock, the
+		// vibration — is unreachable during a simulacro by construction.
 		if (mode === "exam") {
 			playTick();
 			advance(nextAttempts);
@@ -164,9 +173,11 @@ export function Session({
 		if (correct) {
 			if (nextStreak >= 3) playStreak();
 			else playCorrect();
+			buzzCorrect();
 			fireBurst(nextStreak >= 3 ? "paws" : "confetti");
 		} else {
 			playWrong();
+			buzzWrong();
 		}
 
 		setFeedback({
@@ -181,6 +192,13 @@ export function Session({
 	useEffect(() => {
 		if (feedback) continueRef.current?.focus();
 	}, [feedback]);
+
+	/**
+	 * Derived from the feedback object rather than from `correct` and `mode`,
+	 * which is what makes it exam-proof: in the exam `feedback` is never set, so
+	 * this is null for the whole run without a single mode check.
+	 */
+	const reaction: Reaction = feedback ? (feedback.correct ? "right" : "wrong") : null;
 
 	const mood: Mood = useMemo(() => {
 		if (!feedback) return mode === "exam" ? "thinking" : "idle";
@@ -218,7 +236,15 @@ export function Session({
 						{formatClock(remaining)}
 					</span>
 				) : (
-					<span className="streak" aria-label={`Racha de ${streak}`}>
+					// Keyed on the number so React replaces the node when it moves,
+					// which is what replays the keyframe. A CSS class toggled on and
+					// off in an effect would need a frame in between to restart, and
+					// would sometimes silently skip.
+					<span
+						key={streak}
+						className={`streak${streak > 0 ? " streak--up" : ""}`}
+						aria-label={`Racha de ${streak}`}
+					>
 						🔥 {streak}
 					</span>
 				)}
@@ -248,6 +274,7 @@ export function Session({
 						exercise={exercise}
 						locked={feedback !== null}
 						onSubmit={handleSubmit}
+						reaction={reaction}
 					/>
 				)}
 				{exercise.kind === "choice" && (
@@ -257,6 +284,7 @@ export function Session({
 						picked={picked}
 						correctAnswer={canonicalAnswer(exercise.verb, exercise.ask)}
 						onSubmit={handleSubmit}
+						reaction={reaction}
 					/>
 				)}
 				{exercise.kind === "row" && (
@@ -264,6 +292,7 @@ export function Session({
 						exercise={exercise}
 						locked={feedback !== null}
 						onSubmit={handleSubmit}
+						reaction={reaction}
 					/>
 				)}
 			</div>

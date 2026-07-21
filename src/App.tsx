@@ -26,6 +26,7 @@ import {
 	type Progress,
 } from "./lib/storage";
 import type { Attempt, Exercise, SessionMode } from "./lib/types";
+import { withViewTransition } from "./lib/viewTransition";
 import "./app.css";
 
 const EXAM_SIZE = 15;
@@ -57,6 +58,8 @@ export default function App() {
 	// A round is "live" while it is being answered. Once the results are up there
 	// is nothing left to lose, so leaving needs no warning.
 	const live = session !== null && outcome === null;
+	// Narrower than `live`: a practice round may buzz, a simulacro may not.
+	const examLive = live && session?.mode === "exam";
 	const liveRef = useRef(live);
 	liveRef.current = live;
 
@@ -199,7 +202,15 @@ export default function App() {
 					mode === "exam" ? { scorePercent } : undefined,
 				),
 			);
-			setOutcome({ attempts: graded, mode, timedOut });
+			// The last question turning into the score is the biggest change of
+			// scenery in the app, and it is the one screen change that is NOT a
+			// change of address — so it has to ask for the transition itself
+			// rather than getting it from the router. The kitten is on both sides
+			// of it, which is the whole reason it is worth doing: he walks out of
+			// the question and into the result instead of blinking there.
+			withViewTransition("page", () =>
+				setOutcome({ attempts: graded, mode, timedOut }),
+			);
 		},
 		[],
 	);
@@ -225,6 +236,7 @@ export default function App() {
 					achievement={unlocks[0]}
 					onWear={wear}
 					onDismiss={dismissUnlock}
+					haptic={!examLive}
 				/>
 			)}
 			<ConfirmDialog

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { withViewTransition } from "./viewTransition";
 
 /**
  * A router in sixty lines, because this app has six addresses.
@@ -82,7 +83,10 @@ export function useRouter(guard?: RouteGuard) {
 				history.pushState(null, "", PATHS[from]);
 				return;
 			}
-			setRoute(to);
+			// The back gesture gets the same transition as a tap on the bar. It is
+			// the way anyone actually navigates on a phone; leaving it as the one
+			// hard cut in the app would make the app's own back feel broken.
+			withViewTransition("page", () => setRoute(to));
 		};
 		window.addEventListener("popstate", onPop);
 		return () => window.removeEventListener("popstate", onPop);
@@ -93,7 +97,10 @@ export function useRouter(guard?: RouteGuard) {
 			const path = PATHS[to];
 			if (options?.replace) history.replaceState(null, "", path);
 			else history.pushState(null, "", path);
-			setRoute(to);
+			// The address is written before the transition starts, so the snapshot
+			// the browser takes already belongs to the destination. Swapping the two
+			// leaves the URL a frame behind the screen.
+			withViewTransition("page", () => setRoute(to));
 		},
 		[],
 	);

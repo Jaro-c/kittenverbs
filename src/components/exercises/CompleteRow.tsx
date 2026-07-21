@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { FIELD_LABEL } from "../../lib/exercises";
 import type { Field, RowExercise } from "../../lib/types";
+import type { Reaction } from "../../lib/reaction";
+import { reactionClass } from "../../lib/reaction";
 
 const COLUMNS: Field[] = ["base", "past", "participle", "es"];
 
@@ -8,6 +10,8 @@ interface Props {
 	exercise: RowExercise;
 	locked: boolean;
 	onSubmit: (answers: string[]) => void;
+	/** Null in the exam, always: the card must not twitch either. */
+	reaction: Reaction;
 }
 
 /**
@@ -15,7 +19,7 @@ interface Props {
  * filled in. Showing the row rather than one isolated prompt is the point —
  * it is how the paper will look tomorrow.
  */
-export function CompleteRow({ exercise, locked, onSubmit }: Props) {
+export function CompleteRow({ exercise, locked, onSubmit, reaction }: Props) {
 	const [values, setValues] = useState<Record<string, string>>({});
 	const firstRef = useRef<HTMLInputElement>(null);
 
@@ -29,7 +33,7 @@ export function CompleteRow({ exercise, locked, onSubmit }: Props) {
 
 	return (
 		<form
-			className="exercise"
+			className={`exercise${reactionClass(reaction)}`}
 			onSubmit={(event) => {
 				event.preventDefault();
 				if (locked || !ready) return;

@@ -1,6 +1,8 @@
 import { FIELD_LABEL } from "../../lib/exercises";
 import { SpeakButton } from "../SpeakButton";
 import type { ChoiceExercise } from "../../lib/types";
+import type { Reaction } from "../../lib/reaction";
+import { reactionClass } from "../../lib/reaction";
 
 interface Props {
 	exercise: ChoiceExercise;
@@ -9,6 +11,8 @@ interface Props {
 	picked: string | null;
 	correctAnswer: string;
 	onSubmit: (answers: string[]) => void;
+	/** Null in the exam, always: the card must not twitch either. */
+	reaction: Reaction;
 }
 
 export function ChoiceGrid({
@@ -17,11 +21,12 @@ export function ChoiceGrid({
 	picked,
 	correctAnswer,
 	onSubmit,
+	reaction,
 }: Props) {
 	const clue = exercise.verb[exercise.given];
 
 	return (
-		<div className="exercise">
+		<div className={`exercise${reactionClass(reaction)}`}>
 			<p className="exercise__instruction">
 				Elige el <strong>{FIELD_LABEL[exercise.ask]}</strong>
 			</p>

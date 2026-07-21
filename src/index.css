@@ -49,6 +49,42 @@
 	--shadow: 3px 3px 0 var(--line);
 	--shadow-lg: 5px 5px 0 var(--line);
 
+	/* ─── Motion ────────────────────────────────────────────────────────────────
+	   The rule this app is built on: if it fires BY ITSELF and repeats, it is slow
+	   and quiet; if it ANSWERS something she did, it is fast and loud. The two
+	   families below are that rule written as numbers, and nothing may invent a
+	   duration outside them — this is a study app she will open hundreds of times,
+	   and a screen that is always moving is exhausting by the third session.
+
+	   Answers her (fast, expressive):
+	     --t-tap    the control acknowledging the press
+	     --t-ui     a state settling: filter, toggle, hover, dialog
+	     --t-react  the exercise card reacting to a right or wrong answer
+	     --t-page   a whole screen changing address
+	   Fires by itself (slow, quiet):
+	     --t-reveal  a row arriving as it scrolls in
+	     --t-count   the records counting up to their value
+	   The ambient loops (the cat breathing, the background cat's ball) already
+	   live at 2.6s–7s in their own files and stay there: 15–40× the tap. */
+	--t-tap: 110ms;
+	--t-ui: 190ms;
+	--t-react: 420ms;
+	--t-page: 320ms;
+	--t-reveal: 620ms;
+	--t-count: 700ms;
+	/* One step of a staggered list. 15 verb rows × 26ms = a 390ms sweep: read as
+	   one gesture, not as fifteen separate arrivals. */
+	--t-step: 26ms;
+
+	/* Three curves, and only three. A build with a different cubic-bezier at every
+	   call site has no motion identity, it has sixteen accidents.
+	   --ease-out    everything that arrives and stops
+	   --ease-in     everything that leaves (exits are quicker than entrances)
+	   --ease-spring the one overshoot: a press releasing, an icon locking in */
+	--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+	--ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
 	color-scheme: light;
 }
 
@@ -135,4 +171,24 @@ h3 {
 	outline: 3px solid var(--brand);
 	outline-offset: 3px;
 	border-radius: 6px;
+}
+
+/* ─── The kill switch, at the token layer ──────────────────────────────────────
+   app.css also carries the blunt `*` override, and it has to: it catches the
+   keyframes that name their own duration. But a rule that reaches every future
+   animation without being edited is worth more than one that has to be
+   remembered, so every duration in this app is a token and every token collapses
+   here. Delays go to zero too — a staggered row that keeps its delay while the
+   duration is gone freezes in its `from` state, which turns a preference for
+   less movement into a blank page. */
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--t-tap: 0.01ms;
+		--t-ui: 0.01ms;
+		--t-react: 0.01ms;
+		--t-page: 0.01ms;
+		--t-reveal: 0.01ms;
+		--t-count: 0.01ms;
+		--t-step: 0ms;
+	}
 }

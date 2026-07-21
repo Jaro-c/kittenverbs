@@ -1,5 +1,7 @@
+import type { CSSProperties } from "react";
 import { hasHistory, overall, strongest, toughest } from "../lib/records";
 import type { Progress } from "../lib/storage";
+import { useCountUp } from "../lib/useCountUp";
 import { KittenStage } from "./KittenStage";
 import { SpeakButton } from "./SpeakButton";
 import { WeekGoal } from "./WeekGoal";
@@ -50,23 +52,31 @@ export function RecordsPage({ progress, onPet, onPractice }: Props) {
 			</header>
 
 			<div className="records">
-				<Record value={`${stats.percent}%`} label="aciertos en total" />
-				<Record value={stats.answered} label="preguntas respondidas" />
-				<Record value={stats.sessions} label={stats.sessions === 1 ? "ronda" : "rondas"} />
-				<Record
-					value={stats.bestExam === null ? "—" : `${stats.bestExam}%`}
-					label="mejor simulacro"
-				/>
-				<Record value={`🔥 ${stats.bestStreak}`} label="racha más larga" />
-				<Record value={`${stats.seen}/${stats.ofTotal}`} label="verbos vistos" />
-				<Record value={stats.unlocked} label="logros" />
-				<Record value={stats.pets} label="caricias al gatito" />
+				{[
+					{ n: stats.percent, suffix: "%", label: "aciertos en total" },
+					{ n: stats.answered, label: "preguntas respondidas" },
+					{
+						n: stats.sessions,
+						label: stats.sessions === 1 ? "ronda" : "rondas",
+					},
+					{ n: stats.bestExam, suffix: "%", label: "mejor simulacro" },
+					{ n: stats.bestStreak, mark: "🔥", label: "racha más larga" },
+					{
+						n: stats.seen,
+						suffix: `/${stats.ofTotal}`,
+						label: "verbos vistos",
+					},
+					{ n: stats.unlocked, label: "logros" },
+					{ n: stats.pets, label: "caricias al gatito" },
+				].map((record, i) => (
+					<Record key={record.label} index={i} {...record} />
+				))}
 			</div>
 
 			<WeekGoal progress={progress} />
 
 			{worst.length > 0 && (
-				<div className="ranking">
+				<div className="ranking reveal">
 					<h2 className="ranking__title">Los que se te resisten</h2>
 					<ul className="ranking__list">
 						{worst.map((row) => (
@@ -103,7 +113,7 @@ export function RecordsPage({ progress, onPet, onPractice }: Props) {
 			)}
 
 			{best.length > 0 && (
-				<div className="ranking">
+				<div className="ranking reveal">
 					<h2 className="ranking__title">Los que ya dominas</h2>
 					<ul className="ranking__list">
 						{best.map((row) => (
@@ -122,7 +132,7 @@ export function RecordsPage({ progress, onPet, onPractice }: Props) {
 				</div>
 			)}
 
-			<p className="page__note">
+			<p className="page__note reveal">
 				Un verbo entra en estas listas a partir de tres intentos. Con menos, un
 				fallo suelto lo colocaría de nemesis sin merecerlo.
 			</p>
@@ -130,10 +140,40 @@ export function RecordsPage({ progress, onPet, onPractice }: Props) {
 	);
 }
 
-function Record({ value, label }: { value: string | number; label: string }) {
+/** Mirrors --t-count in index.css; the two are the same decision, stated twice
+ *  because a rAF loop cannot read a stylesheet without becoming worse code. */
+const COUNT_MS = 700;
+
+function Record({
+	n,
+	label,
+	suffix = "",
+	mark,
+	index,
+}: {
+	/** null means the record does not exist yet — a dash, never a zero. */
+	n: number | null;
+	label: string;
+	suffix?: string;
+	/** A decorative glyph in front of the figure, hidden from screen readers. */
+	mark?: string;
+	/** Position in the grid, so the cards arrive as a sweep rather than a slab. */
+	index: number;
+}) {
+	const shown = useCountUp(n ?? 0, COUNT_MS);
+
 	return (
-		<div className="record">
-			<span className="record__value">{value}</span>
+		<div className="record reveal-step" style={{ "--i": index } as CSSProperties}>
+			<span className="record__value">
+				{mark && <span aria-hidden="true">{mark} </span>}
+				{/* The label carries the settled number, so a screen reader reads the
+				    record once and correctly instead of narrating a slot machine. */}
+				<span aria-hidden="true">
+					{n === null ? "—" : shown}
+					{n === null ? "" : suffix}
+				</span>
+				<span className="sr-only">{n === null ? "sin marca todavía" : `${n}${suffix}`}</span>
+			</span>
 			<span className="record__label">{label}</span>
 		</div>
 	);

@@ -52,8 +52,34 @@ bun run lint
 ## Stack
 
 Vite · React · TypeScript · CSS nativo con custom properties · cero
-dependencias de UI. El progreso vive en `localStorage`; no hay backend.
+dependencias de UI y cero librerías de animación. El progreso vive en
+`localStorage`; no hay backend.
 
 Tema claro y oscuro según el sistema. El gatito es un SVG en línea, así que
-cambia de humor sin pedir una imagen nueva, y todo el movimiento se apaga con
-`prefers-reduced-motion`.
+cambia de humor sin pedir una imagen nueva.
+
+## Lo nativo antes que la librería
+
+Cada una de estas es una API del navegador haciendo el trabajo por el que
+normalmente se pagan kilobytes:
+
+| Para | Uso |
+|---|---|
+| Sonidos y ronroneo | Osciladores de Web Audio, sin archivos |
+| Pronunciación | `speechSynthesis` con `lang` fijado a `en-US` a mano |
+| Rutas y botón atrás | History API, enrutador propio de sesenta líneas |
+| Transición entre pantallas | View Transitions API |
+| Revelar al hacer scroll | `animation-timeline: view()` |
+| Diálogos | `<dialog>` nativo: foco atrapado y Escape de fábrica |
+| Vibración al responder | `navigator.vibrate`, solo donde existe |
+
+Todas se comprueban antes de usarse y degradan solas donde no estén.
+
+## Accesibilidad
+
+`prefers-reduced-motion: reduce` apaga **todo** el movimiento: transiciones de
+pantalla, revelados, contadores, partículas y el gato del fondo. Medido: cero
+animaciones en marcha y ningún elemento atrapado invisible o desplazado.
+
+Contraste AA verificado sobre elementos renderizados en ambos temas, foco
+visible comprobado con Tab real, y objetivos táctiles de 44px o más.
