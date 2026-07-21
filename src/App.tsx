@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BackgroundCat } from "./components/BackgroundCat";
 import { BottomNav } from "./components/BottomNav";
+import { CalmPage } from "./components/CalmPage";
 import { ConfirmDialog } from "./components/ConfirmDialog";
 import { Home } from "./components/Home";
 import { RecordsPage } from "./components/RecordsPage";
@@ -335,6 +336,8 @@ export default function App() {
 
 	function page() {
 		if (route === "verbs") return <VerbsPage />;
+		if (route === "calm")
+			return <CalmPage progress={progress} onPet={pet} />;
 		if (route === "achievements")
 			return (
 				<section className="page">

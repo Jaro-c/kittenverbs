@@ -43,4 +43,5 @@ const ICON: Partial<Record<RouteName, string>> = {
 	verbs: "📖",
 	records: "📈",
 	achievements: "🏅",
+	calm: "🌙",
 };

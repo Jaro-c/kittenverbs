@@ -808,11 +808,15 @@
 	   a layer rather than as the bottom of the world. */
 	left: 50%;
 	transform: translateX(-50%);
-	width: min(100% - 1.6rem, 25rem);
+	width: min(100% - 1.2rem, 27rem);
 	bottom: max(var(--nav-gap), env(safe-area-inset-bottom, 0px));
 	z-index: 40;
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	/* Adapts to however many sections exist instead of hardcoding the count —
+	   the fifth tab arrived and a `repeat(4, 1fr)` would have silently squeezed
+	   it into a second row inside a pill with hidden overflow. */
+	grid-auto-flow: column;
+	grid-auto-columns: 1fr;
 	background: var(--surface);
 	border: 2px solid var(--line);
 	border-radius: 999px;
@@ -1810,5 +1814,163 @@
 		   stilling it. */
 		animation-delay: 0ms !important;
 		transition-delay: 0ms !important;
+	}
+}
+
+/* ─── Un ratito con el gato ────────────────────────────────────────────────── */
+
+.calm {
+	align-items: center;
+	text-align: center;
+}
+
+.calm__stage {
+	display: grid;
+	place-items: center;
+	padding: 1.2rem;
+	border-radius: 50%;
+	transition: background-color var(--t-ui) var(--ease-out);
+}
+
+/* While it purrs the cat sits in a soft halo that breathes at the same rate as
+   the audio. Slow on purpose: it fires by itself and repeats, so it belongs to
+   the quiet family of timings, not the reactive one. */
+.calm__stage--on {
+	background: radial-gradient(
+		circle,
+		var(--brand-tint) 0%,
+		transparent 70%
+	);
+	animation: calm-halo 2.9s ease-in-out infinite;
+}
+
+@keyframes calm-halo {
+	0%,
+	100% {
+		transform: scale(1);
+		opacity: 0.85;
+	}
+	50% {
+		transform: scale(1.05);
+		opacity: 1;
+	}
+}
+
+.calm__timers {
+	display: flex;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.calm__note {
+	max-width: 40ch;
+	text-wrap: pretty;
+}
+
+/* ─── Mezclador ───────────────────────────────────────────────────────────── */
+
+.mixer {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.9rem;
+	padding: 1.1rem 1.15rem;
+	background: var(--surface);
+	border: 2px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	text-align: start;
+}
+
+.mixer__row {
+	display: grid;
+	grid-template-columns: 8.5rem 1fr 2.5rem;
+	align-items: center;
+	gap: 0.7rem;
+}
+
+.mixer__label {
+	display: flex;
+	flex-direction: column;
+	font-weight: 700;
+	font-size: 0.9rem;
+}
+
+.mixer__label small {
+	font-weight: 400;
+	font-size: 0.72rem;
+	color: var(--muted);
+}
+
+.mixer__value {
+	font-variant-numeric: tabular-nums;
+	font-size: 0.82rem;
+	color: var(--muted);
+	text-align: end;
+}
+
+/* The slider is styled by hand in both engines: the stock control ignores the
+   app's border and shadow language entirely. */
+.mixer input[type="range"] {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 100%;
+	height: 24px;
+	background: transparent;
+	cursor: pointer;
+}
+
+.mixer input[type="range"]::-webkit-slider-runnable-track {
+	height: 10px;
+	background: var(--surface-sunk);
+	border: 2px solid var(--line);
+	border-radius: 999px;
+}
+
+.mixer input[type="range"]::-moz-range-track {
+	height: 10px;
+	background: var(--surface-sunk);
+	border: 2px solid var(--line);
+	border-radius: 999px;
+}
+
+.mixer input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 22px;
+	height: 22px;
+	margin-top: -8px;
+	background: var(--brand);
+	border: 2px solid var(--line);
+	border-radius: 50%;
+	box-shadow: 2px 2px 0 var(--line);
+}
+
+.mixer input[type="range"]::-moz-range-thumb {
+	width: 22px;
+	height: 22px;
+	background: var(--brand);
+	border: 2px solid var(--line);
+	border-radius: 50%;
+	box-shadow: 2px 2px 0 var(--line);
+}
+
+.mixer input[type="range"]:focus-visible {
+	outline: 3px solid var(--brand);
+	outline-offset: 4px;
+	border-radius: 999px;
+}
+
+@media (max-width: 400px) {
+	.mixer__row {
+		grid-template-columns: 6.8rem 1fr 2.2rem;
+		gap: 0.5rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.calm__stage--on {
+		animation: none;
 	}
 }

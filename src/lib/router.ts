@@ -14,7 +14,8 @@ export type RouteName =
 	| "exam"
 	| "verbs"
 	| "achievements"
-	| "records";
+	| "records"
+	| "calm";
 
 const PATHS: Record<RouteName, string> = {
 	home: "/",
@@ -23,6 +24,7 @@ const PATHS: Record<RouteName, string> = {
 	verbs: "/verbos",
 	achievements: "/logros",
 	records: "/marcas",
+	calm: "/calma",
 };
 
 /** Routes that are a place to be, and so appear in the navigation bar. */
@@ -31,6 +33,7 @@ export const NAV: { route: RouteName; label: string }[] = [
 	{ route: "verbs", label: "Verbos" },
 	{ route: "records", label: "Marcas" },
 	{ route: "achievements", label: "Logros" },
+	{ route: "calm", label: "Calma" },
 ];
 
 /** A round is running: the bar is hidden so she cannot wander out of it. */
