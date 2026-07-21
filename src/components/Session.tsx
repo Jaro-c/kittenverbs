@@ -28,6 +28,8 @@ interface Props {
 	onBurst: (kind: BurstKind, x?: number, y?: number) => void;
 	onFinish: (attempts: Attempt[], timedOut: boolean) => void;
 	onQuit: () => void;
+	/** How many answers are in, so the leave prompt can name the question. */
+	onProgress?: (answered: number) => void;
 }
 
 interface Feedback {
@@ -57,6 +59,7 @@ export function Session({
 	onBurst,
 	onFinish,
 	onQuit,
+	onProgress,
 }: Props) {
 	const [index, setIndex] = useState(0);
 	const [attempts, setAttempts] = useState<Attempt[]>([]);
@@ -143,6 +146,7 @@ export function Session({
 		const nextAttempts = [...attempts, attempt];
 		const nextStreak = correct ? streak + 1 : 0;
 		setAttempts(nextAttempts);
+		onProgress?.(nextAttempts.length);
 		setStreak(nextStreak);
 		if (exercise.kind === "choice") setPicked(given[0]);
 

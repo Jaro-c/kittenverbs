@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ConfirmDialog } from "./components/ConfirmDialog";
 import { Home } from "./components/Home";
 import { Particles, type Burst, type BurstKind } from "./components/Particles";
 import { Results } from "./components/Results";
@@ -8,6 +9,7 @@ import { UnlockToast } from "./components/UnlockToast";
 import type { AccessoryId } from "./lib/accessories";
 import { syncAchievements, type Achievement } from "./lib/achievements";
 import { buildSession } from "./lib/exercises";
+import { useRouter, type RouteName } from "./lib/router";
 import {
 	loadProgress,
 	recordPet,
@@ -24,17 +26,43 @@ import "./app.css";
 const EXAM_SIZE = 15;
 const EXAM_SECONDS = 450; // 7:30 — thirty seconds a question.
 
-type ScreenState =
-	| { name: "home" }
-	| { name: "session"; exercises: Exercise[]; mode: SessionMode }
-	| { name: "results"; attempts: Attempt[]; mode: SessionMode; timedOut: boolean };
+interface LiveSession {
+	exercises: Exercise[];
+	mode: SessionMode;
+}
+
+interface Outcome {
+	attempts: Attempt[];
+	mode: SessionMode;
+	timedOut: boolean;
+}
+
+type Prompt = "leave" | "reset" | null;
 
 export default function App() {
-	const [screen, setScreen] = useState<ScreenState>({ name: "home" });
 	const [progress, setProgress] = useState<Progress>(loadProgress);
+	const [session, setSession] = useState<LiveSession | null>(null);
+	const [outcome, setOutcome] = useState<Outcome | null>(null);
+	const [answered, setAnswered] = useState(0);
+	const [prompt, setPrompt] = useState<Prompt>(null);
 	const [burst, setBurst] = useState<Burst | null>(null);
 	const [unlocks, setUnlocks] = useState<Achievement[]>([]);
 	const burstId = useRef(0);
+
+	// A round is "live" while it is being answered. Once the results are up there
+	// is nothing left to lose, so leaving needs no warning.
+	const live = session !== null && outcome === null;
+	const liveRef = useRef(live);
+	liveRef.current = live;
+
+	const guard = useCallback((from: RouteName, to: RouteName) => {
+		if (from === "home" || !liveRef.current) return true;
+		void to;
+		setPrompt("leave");
+		return false;
+	}, []);
+
+	const { route, navigate } = useRouter(guard);
 
 	useEffect(() => {
 		saveProgress(progress);
@@ -59,13 +87,44 @@ export default function App() {
 
 	const weakIds = useMemo(() => weakestVerbIds(progress, 10), [progress]);
 
+	const build = useCallback(
+		(mode: SessionMode, verbIds?: string[]): LiveSession => ({
+			mode,
+			exercises: buildSession({
+				mode,
+				verbIds,
+				// A review round of two verbs should still be worth opening, so it
+				// asks each of them a few times rather than ending in two taps.
+				size:
+					mode === "exam"
+						? EXAM_SIZE
+						: verbIds
+							? Math.max(verbIds.length * 2, 8)
+							: undefined,
+			}),
+		}),
+		[],
+	);
+
 	/**
-	 * One particle canvas for the whole app, driven from here.
+	 * Keeps the screen in step with the address.
 	 *
-	 * It used to live inside Session and Results, which left the home screen with
-	 * no way to throw anything — and petting the cat has to work wherever the cat
-	 * is. One overlay also means one resize listener instead of three.
+	 * This is what makes a cold load of /practicar work: there is no round in
+	 * memory, so one is built. A round cannot be restored from a URL anyway — the
+	 * questions are drawn at random when it starts — so opening the link starts a
+	 * fresh round rather than trying to resurrect something that never existed.
 	 */
+	useEffect(() => {
+		if (route === "home") {
+			setSession(null);
+			setOutcome(null);
+			setAnswered(0);
+			return;
+		}
+		const mode: SessionMode = route === "exam" ? "exam" : "practice";
+		setSession((current) => (current ? current : build(mode)));
+	}, [route, build]);
+
 	const fire = useCallback((kind: BurstKind, x?: number, y?: number) => {
 		burstId.current += 1;
 		setBurst({ id: burstId.current, kind, x, y });
@@ -83,35 +142,28 @@ export default function App() {
 		setProgress((current) => wearAccessory(current, accessory));
 	}, []);
 
-	const startPractice = useCallback((verbIds?: string[]) => {
-		setScreen({
-			name: "session",
-			mode: "practice",
-			exercises: buildSession({
-				mode: "practice",
-				verbIds,
-				// A review round of two verbs should still be worth opening, so it
-				// asks each of them a few times rather than ending in two taps.
-				size: verbIds ? Math.max(verbIds.length * 2, 8) : undefined,
-			}),
-		});
-	}, []);
+	const start = useCallback(
+		(mode: SessionMode, verbIds?: string[]) => {
+			setOutcome(null);
+			setAnswered(0);
+			setSession(build(mode, verbIds));
+			const to: RouteName = mode === "exam" ? "exam" : "practice";
+			// Replacing when already there keeps "review my misses" from stacking a
+			// second identical entry, which would make back land on a dead round.
+			navigate(to, { replace: route === to });
+		},
+		[build, navigate, route],
+	);
 
-	const startExam = useCallback(() => {
-		setScreen({
-			name: "session",
-			mode: "exam",
-			exercises: buildSession({ mode: "exam", size: EXAM_SIZE }),
-		});
-	}, []);
+	const goHome = useCallback(() => {
+		setSession(null);
+		setOutcome(null);
+		setAnswered(0);
+		navigate("home");
+	}, [navigate]);
 
 	const finish = useCallback(
-		(
-			attempts: Attempt[],
-			timedOut: boolean,
-			exercises: Exercise[],
-			mode: SessionMode,
-		) => {
+		(attempts: Attempt[], timedOut: boolean, exercises: Exercise[], mode: SessionMode) => {
 			// A run cut short by the clock is still scored out of the full paper —
 			// grading only what was reached would hand a perfect score to someone
 			// who answered three questions and then ran out of time.
@@ -141,7 +193,7 @@ export default function App() {
 					mode === "exam" ? { scorePercent } : undefined,
 				),
 			);
-			setScreen({ name: "results", attempts: graded, mode, timedOut });
+			setOutcome({ attempts: graded, mode, timedOut });
 		},
 		[],
 	);
@@ -151,13 +203,13 @@ export default function App() {
 		[],
 	);
 
+	const total = session?.exercises.length ?? 0;
+
 	// The card is fixed to the bottom of the viewport, so on a short screen it
 	// parks itself on top of the primary button. Reserving the room while one is
 	// queued keeps every action reachable instead of hidden for seven seconds.
 	const shellClass = `app${unlocks.length > 0 ? " app--toast" : ""}`;
 
-	// The same on every screen: the canvas that never takes a click, and the one
-	// milestone card at the front of the queue.
 	const overlays = (
 		<>
 			<Particles burst={burst} />
@@ -169,24 +221,57 @@ export default function App() {
 					onDismiss={dismissUnlock}
 				/>
 			)}
+			<ConfirmDialog
+				open={prompt === "leave"}
+				title="¿Dejas la ronda?"
+				body={
+					answered > 0
+						? `Vas por la ${Math.min(answered + 1, total)} de ${total}. Si sales ahora se pierde.`
+						: "Todavía no has respondido nada."
+				}
+				confirmLabel="Salir"
+				cancelLabel="Seguir aquí"
+				danger
+				onConfirm={() => {
+					setPrompt(null);
+					goHome();
+				}}
+				onCancel={() => setPrompt(null)}
+			/>
+			<ConfirmDialog
+				open={prompt === "reset"}
+				title="¿Borrar tu progreso?"
+				body="Se van la racha, los logros y los accesorios. No se puede deshacer."
+				confirmLabel="Borrar todo"
+				cancelLabel="Mejor no"
+				danger
+				onConfirm={() => {
+					setPrompt(null);
+					resetProgress();
+					setProgress(loadProgress());
+				}}
+				onCancel={() => setPrompt(null)}
+			/>
 		</>
 	);
 
-	if (screen.name === "session") {
+	if (session && outcome) {
+		const missed = [
+			...new Set(outcome.attempts.filter((a) => !a.correct).map((a) => a.verbId)),
+		];
 		return (
 			<main className={shellClass}>
-				<Screen name="session">
-					<Session
-						exercises={screen.exercises}
-						mode={screen.mode}
-						timeLimitSec={screen.mode === "exam" ? EXAM_SECONDS : undefined}
+				<Screen name="results">
+					<Results
+						attempts={outcome.attempts}
+						mode={outcome.mode}
+						timedOut={outcome.timedOut}
+						missedVerbIds={missed}
 						accessory={progress.accessory}
 						onPet={pet}
 						onBurst={fire}
-						onFinish={(attempts, timedOut) =>
-							finish(attempts, timedOut, screen.exercises, screen.mode)
-						}
-						onQuit={() => setScreen({ name: "home" })}
+						onReviewMissed={() => start("practice", missed)}
+						onHome={goHome}
 					/>
 				</Screen>
 				{overlays}
@@ -194,23 +279,23 @@ export default function App() {
 		);
 	}
 
-	if (screen.name === "results") {
-		const missed = [
-			...new Set(screen.attempts.filter((a) => !a.correct).map((a) => a.verbId)),
-		];
+	if (session) {
 		return (
 			<main className={shellClass}>
-				<Screen name="results">
-					<Results
-						attempts={screen.attempts}
-						mode={screen.mode}
-						timedOut={screen.timedOut}
-						missedVerbIds={missed}
+				<Screen name="session">
+					<Session
+						key={session.exercises[0]?.id ?? "empty"}
+						exercises={session.exercises}
+						mode={session.mode}
+						timeLimitSec={session.mode === "exam" ? EXAM_SECONDS : undefined}
 						accessory={progress.accessory}
 						onPet={pet}
 						onBurst={fire}
-						onReviewMissed={() => startPractice(missed)}
-						onHome={() => setScreen({ name: "home" })}
+						onProgress={setAnswered}
+						onFinish={(attempts, timedOut) =>
+							finish(attempts, timedOut, session.exercises, session.mode)
+						}
+						onQuit={() => setPrompt("leave")}
 					/>
 				</Screen>
 				{overlays}
@@ -224,15 +309,11 @@ export default function App() {
 				<Home
 					progress={progress}
 					weakIds={weakIds}
-					onPractice={startPractice}
-					onExam={startExam}
+					onPractice={(verbIds) => start("practice", verbIds)}
+					onExam={() => start("exam")}
 					onPet={pet}
 					onWear={wear}
-					onReset={() => {
-						if (!confirm("¿Borrar todo tu progreso?")) return;
-						resetProgress();
-						setProgress(loadProgress());
-					}}
+					onReset={() => setPrompt("reset")}
 				/>
 			</Screen>
 			{overlays}

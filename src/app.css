@@ -656,6 +656,55 @@
 	color: var(--bad);
 }
 
+/* ─── Confirm dialog ───────────────────────────────────────────────────────── */
+
+.confirm {
+	margin: auto;
+	width: min(100% - 2.5rem, 24rem);
+	padding: 1.4rem 1.3rem 1.15rem;
+	background: var(--surface);
+	color: var(--text);
+	border: 2px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow-lg);
+}
+
+.confirm::backdrop {
+	background: rgb(0 0 0 / 0.45);
+}
+
+.confirm__title {
+	font-size: 1.3rem;
+	margin-bottom: 0.5rem;
+}
+
+.confirm__body {
+	color: var(--muted);
+	font-size: 0.95rem;
+	margin-bottom: 1.15rem;
+}
+
+.confirm__actions {
+	display: flex;
+	gap: 0.6rem;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+}
+
+/* Destructive confirmations do not borrow the brand colour: orange is what every
+   safe primary button in this app already uses. */
+.btn--danger {
+	background: var(--bad);
+	color: var(--surface);
+	border-color: var(--line);
+}
+
+@media (prefers-color-scheme: dark) {
+	.btn--danger {
+		color: #241b15;
+	}
+}
+
 /* ─── Speak button ─────────────────────────────────────────────────────────────
    Sits beside English text she can already see. Never beside an answer she has
    not given yet, which would read it out loud. */
