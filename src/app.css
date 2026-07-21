@@ -656,6 +656,32 @@
 	color: var(--bad);
 }
 
+/* ─── Controls are for pressing, not for reading ───────────────────────────────
+   Measured: double-clicking a button selects its label. On a phone a double tap
+   then raises the selection callout on top of the very control she just pressed,
+   which reads as the app breaking.
+
+   Deliberately scoped to controls. Content text — the verb table, the clue, the
+   answers on the results screen — stays selectable, because copying a verb out
+   is a reasonable thing to want and blanket `user-select: none` would take it
+   away. (The one place this is NOT needed is a placeholder: its text is not
+   selectable content in the first place. Measured — a double click there returns
+   an empty selection.) */
+
+.btn,
+.nav__item,
+.choice,
+.filter,
+.speak,
+.sound-toggle,
+.kitten-stage,
+.link-reset,
+.trophies__toggle,
+.wardrobe__option {
+	user-select: none;
+	-webkit-user-select: none;
+}
+
 /* ─── Bottom navigation ────────────────────────────────────────────────────── */
 
 .nav {
