@@ -39,6 +39,11 @@
 	   it (page padding, the milestone card, the background cat) and they were
 	   each guessing 58px while it actually measures 64. One token, measured. */
 	--nav-h: 64px;
+	/* Gap between the floating bar and the edge of the screen. Everything that
+	   has to stay clear of the bar offsets against --nav-space, so the number
+	   lives in exactly one place. */
+	--nav-gap: 0.9rem;
+	--nav-space: calc(var(--nav-h) + var(--nav-gap) + env(safe-area-inset-bottom, 0px));
 
 	--radius: 16px;
 	--shadow: 3px 3px 0 var(--line);

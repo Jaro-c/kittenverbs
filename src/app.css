@@ -693,20 +693,27 @@
 
 .nav {
 	position: fixed;
-	inset-inline: 0;
-	bottom: 0;
+	/* Floating rather than edge to edge. Every other surface in this app is a
+	   bordered card sitting on its own hard shadow; a full-bleed strip with a
+	   single hairline on top was the one element that did not speak the same
+	   language. It also lets the page scroll visibly underneath, which reads as
+	   a layer rather than as the bottom of the world. */
+	left: 50%;
+	transform: translateX(-50%);
+	width: min(100% - 1.6rem, 25rem);
+	bottom: max(var(--nav-gap), env(safe-area-inset-bottom, 0px));
 	z-index: 40;
 	display: grid;
 	grid-template-columns: repeat(4, 1fr);
 	background: var(--surface);
-	border-top: 2px solid var(--line);
-	/* Phones with a home indicator eat the bottom strip; without this the labels
-	   sit under it and the last row of the bar is untappable. */
-	padding-bottom: env(safe-area-inset-bottom, 0);
+	border: 2px solid var(--line);
+	border-radius: 999px;
+	box-shadow: var(--shadow-lg);
 	/* A fixed height, not a minimum: --nav-h is what three other rules offset
 	   themselves against, so it has to be a fact. With min-height the items and
 	   the border pushed it to 66px and the background cat overlapped by 2. */
-	height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+	height: var(--nav-h);
+	overflow: hidden;
 }
 
 .nav__item {
@@ -749,7 +756,7 @@
 
 /* Room for the bar so it never covers the last control on the page. */
 .app--nav {
-	padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 1.25rem);
+	padding-bottom: calc(var(--nav-space) + 1.25rem);
 }
 
 /* The milestone card is also pinned to the bottom, and it outranks the bar on
@@ -757,7 +764,7 @@
    every tap on the nav for the seven seconds it was up. Where there is a bar,
    the card sits on top of it instead of over it. */
 .app--nav .unlock {
-	bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 0.75rem);
+	bottom: calc(var(--nav-space) + 0.6rem);
 }
 
 /* ─── Section pages ────────────────────────────────────────────────────────── */

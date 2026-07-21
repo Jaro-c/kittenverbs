@@ -10,7 +10,7 @@
 	position: fixed;
 	left: max(0px, calc(50vw - 22rem));
 	/* Sits above the nav bar so the two never overlap. */
-	bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+	bottom: var(--nav-space);
 	z-index: 0;
 	pointer-events: none;
 	opacity: 0.22;
