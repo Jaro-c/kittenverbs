@@ -1,6 +1,6 @@
 # Kitten Verbs
 
-Practico los 15 verbos irregulares en inglés que entran en mi evaluación:
+Practico los 77 verbos irregulares en inglés que entran en mi evaluación:
 `infinitive · past tense · past participle`, más el significado en español.
 
 Tres formas de preguntar, todas mezcladas: **escribir** la forma que falta,
@@ -9,14 +9,23 @@ examen escrito. Hay también un simulacro cronometrado.
 
 ## Los verbos
 
-spell · spend · stand · steal · swim · take · teach · tell · think · throw ·
-understand · wake · wear · win · write
+become · begin · bite · break · bring · build · burn · buy · catch · choose ·
+come · cost · cut · do · draw · dream · drink · drive · eat · fall · feed ·
+feel · fight · find · fly · forget · forgive · get · give · go · grow · have ·
+hear · hit · hold · hurt · keep · know · learn · leave · lend · lose · make ·
+mean · meet · pay · put · read · ring · run · say · see · sell · send · shine ·
+shoot · show · sing · sit · sleep · smell · speak · spell · spend · stand ·
+steal · swim · take · teach · tell · think · throw · understand · wake ·
+wear · win · write
 
-Ocho son ABB (`spend / spent / spent`) y siete ABC (`swim / swam / swum`), y se
-pueden practicar por separado.
+Se agrupan por patrón y se pueden practicar por separado: 38 son ABB
+(`spend / spent / spent`), 31 son ABC (`swim / swam / swum`), 6 son AAA
+(`cut / cut / cut`) y 3 son ABA (`come / came / come`).
 
-Inglés americano: `spelled` es la forma canónica; `spelt` es británica, se
-acepta al escribir pero no es la que se muestra.
+Inglés americano: la forma regular en `-ed` es la canónica donde el verbo
+también la acepta (`burn`, `dream`, `learn`, `shine`, `smell`, `spell`); la
+forma británica (`burnt`, `dreamt`, `learnt`, `spelt`...) se acepta al
+escribir pero no es la que se muestra.
 
 ## Decisiones
 

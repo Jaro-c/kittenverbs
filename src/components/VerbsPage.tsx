@@ -5,6 +5,8 @@ import { withViewTransition } from "../lib/viewTransition";
 import { SpeakButton } from "./SpeakButton";
 
 const PATTERN_NOTE: Record<Pattern, string> = {
+	AAA: "las tres formas iguales",
+	ABA: "infinitivo y participio iguales",
 	ABB: "pasado y participio iguales",
 	ABC: "las tres formas distintas",
 };
@@ -30,7 +32,7 @@ export function VerbsPage() {
 			</header>
 
 			<div className="filters" role="group" aria-label="Filtrar por patrón">
-				{(["all", "ABB", "ABC"] as const).map((option) => (
+				{(["all", "ABB", "ABC", "ABA", "AAA"] as const).map((option) => (
 					<button
 						key={option}
 						type="button"

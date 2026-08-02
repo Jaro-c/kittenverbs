@@ -2,10 +2,12 @@
 
 /**
  * Shape of a verb's three principal parts, used to group study by pattern.
+ * AAA → all three match (cut/cut/cut).
+ * ABA → infinitive and participle match, past differs (come/came/come).
  * ABB → past and participle match (spend/spent/spent).
  * ABC → all three differ (swim/swam/swum).
  */
-export type Pattern = "ABB" | "ABC";
+export type Pattern = "AAA" | "ABA" | "ABB" | "ABC";
 
 /** The four columns an exercise can hide and ask for. */
 export type Field = "base" | "past" | "participle" | "es";

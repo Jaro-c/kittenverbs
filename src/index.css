@@ -72,8 +72,9 @@
 	--t-page: 320ms;
 	--t-reveal: 620ms;
 	--t-count: 700ms;
-	/* One step of a staggered list. 15 verb rows × 26ms = a 390ms sweep: read as
-	   one gesture, not as fifteen separate arrivals. */
+	/* One step of a staggered list, capped in app.css at 8 rows regardless of
+	   list length: 8 × 26ms = a 208ms sweep, read as one gesture rather than
+	   rows trickling in one by one. */
 	--t-step: 26ms;
 
 	/* Three curves, and only three. A build with a different cubic-bezier at every

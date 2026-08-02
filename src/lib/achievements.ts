@@ -43,8 +43,8 @@ export const ACHIEVEMENTS: Achievement[] = [
 	},
 	{
 		id: "allverbs",
-		title: "Los quince verbos",
-		hint: "Practica los 15 verbos al menos una vez",
+		title: "Todos los verbos",
+		hint: `Practica los ${VERBS.length} verbos al menos una vez`,
 		reached: (p) => Object.keys(p.verbs).length >= VERBS.length,
 	},
 	{
