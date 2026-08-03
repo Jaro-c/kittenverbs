@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FIELD_LABEL } from "../../lib/exercises";
+import { LangBadge } from "../LangBadge";
 import type { Field, RowExercise } from "../../lib/types";
 import type { Reaction } from "../../lib/reaction";
 import { reactionClass } from "../../lib/reaction";
@@ -54,7 +55,10 @@ export function CompleteRow({ exercise, locked, onSubmit, reaction }: Props) {
 					const blankIndex = exercise.blanks.indexOf(field);
 					return (
 						<div className="row-cell" key={field}>
-							<span className="row-cell__label">{FIELD_LABEL[field]}</span>
+							<span className="row-cell__label">
+								{FIELD_LABEL[field]}
+								<LangBadge field={field} />
+							</span>
 							{isBlank ? (
 								<input
 									ref={blankIndex === 0 ? firstRef : undefined}

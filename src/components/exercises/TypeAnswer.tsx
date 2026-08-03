@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FIELD_LABEL } from "../../lib/exercises";
+import { LangBadge } from "../LangBadge";
 import { SpeakButton } from "../SpeakButton";
 import type { TypeExercise } from "../../lib/types";
 import type { Reaction } from "../../lib/reaction";
@@ -37,11 +38,13 @@ export function TypeAnswer({ exercise, locked, onSubmit, reaction }: Props) {
 		>
 			<p className="exercise__instruction">
 				Escribe el <strong>{FIELD_LABEL[exercise.ask]}</strong>
+				<LangBadge field={exercise.ask} />
 			</p>
 
 			<p className="exercise__clue">
 				<span className="exercise__clue-label">
 					{FIELD_LABEL[exercise.given]}
+					<LangBadge field={exercise.given} />
 				</span>
 				<span className="exercise__clue-value">
 					{clue}

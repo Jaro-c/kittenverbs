@@ -1,4 +1,5 @@
 import { FIELD_LABEL } from "../../lib/exercises";
+import { LangBadge } from "../LangBadge";
 import { SpeakButton } from "../SpeakButton";
 import type { ChoiceExercise } from "../../lib/types";
 import type { Reaction } from "../../lib/reaction";
@@ -29,11 +30,13 @@ export function ChoiceGrid({
 		<div className={`exercise${reactionClass(reaction)}`}>
 			<p className="exercise__instruction">
 				Elige el <strong>{FIELD_LABEL[exercise.ask]}</strong>
+				<LangBadge field={exercise.ask} />
 			</p>
 
 			<p className="exercise__clue">
 				<span className="exercise__clue-label">
 					{FIELD_LABEL[exercise.given]}
+					<LangBadge field={exercise.given} />
 				</span>
 				<span className="exercise__clue-value">
 					{clue}

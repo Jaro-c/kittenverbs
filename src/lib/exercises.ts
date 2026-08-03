@@ -74,6 +74,20 @@ export const FIELD_LABEL: Record<Field, string> = {
 	es: "Español",
 };
 
+/**
+ * Which language a field is answered in. Only `es` is Spanish; the other
+ * three are graded on exact English spelling. Drives both the `lang` attribute
+ * on inputs (fixes mobile autocorrect) and the EN/ES badge next to each label,
+ * because the label text alone ("Past tense" vs "Español") is too easy to skim
+ * past mid-exercise.
+ */
+export const FIELD_LANG: Record<Field, "en" | "es"> = {
+	base: "en",
+	past: "en",
+	participle: "en",
+	es: "es",
+};
+
 // ─── Builders ──────────────────────────────────────────────────────────────────
 
 let counter = 0;

@@ -459,6 +459,11 @@
 }
 
 .exercise__instruction {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 0.4rem;
 	font-size: 0.95rem;
 	color: var(--muted);
 	text-align: center;
@@ -477,10 +482,41 @@
 }
 
 .exercise__clue-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
 	font-size: 0.72rem;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
 	color: var(--muted);
+}
+
+/* ─── Language badge ───────────────────────────────────────────────────────────
+   EN in the brand tint (the app's one accent), ES in a plain neutral pill — no
+   second hue invented for it, just tinted vs. untinted. The letters are the
+   real signal; colour only reinforces what is already readable in grayscale. */
+.lang-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.6em;
+	padding: 0.1em 0.4em;
+	border-radius: 999px;
+	font-size: 0.65rem;
+	font-weight: 800;
+	letter-spacing: 0.03em;
+	line-height: 1.4;
+}
+
+.lang-badge--en {
+	background: var(--brand-tint);
+	color: var(--brand);
+}
+
+.lang-badge--es {
+	background: var(--surface-sunk);
+	color: var(--muted);
+	border: 1px solid var(--line-soft);
 }
 
 .exercise__clue-value {
@@ -580,6 +616,9 @@
 }
 
 .row-cell__label {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
 	font-size: 0.68rem;
 	text-transform: uppercase;
 	letter-spacing: 0.06em;
