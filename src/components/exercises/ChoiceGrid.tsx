@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { FIELD_LABEL } from "../../lib/exercises";
 import { LangBadge } from "../LangBadge";
 import { SpeakButton } from "../SpeakButton";
@@ -24,6 +25,19 @@ export function ChoiceGrid({
 	onSubmit,
 	reaction,
 }: Props) {
+	const firstRef = useRef<HTMLButtonElement>(null);
+
+	// The other two exercise kinds focus their input on a fresh question; this
+	// one didn't, so a keyboard-only round worked for one question and then
+	// dropped focus back to the top of the page on every single one after —
+	// tabbing past Salir, the sound toggle and the cat just to reach an answer
+	// again. Same fix, same reason: `option` is the button's key, and a new
+	// question means new option strings, so React mounts fresh buttons rather
+	// than reusing focus-holding ones.
+	useEffect(() => {
+		firstRef.current?.focus();
+	}, [exercise.id]);
+
 	const clue = exercise.verb[exercise.given];
 
 	return (
@@ -45,7 +59,7 @@ export function ChoiceGrid({
 			</p>
 
 			<div className="choices">
-				{exercise.options.map((option) => {
+				{exercise.options.map((option, i) => {
 					const isPicked = picked === option;
 					const isAnswer = option === correctAnswer;
 					// After answering, always reveal which one was right — otherwise a
@@ -60,6 +74,7 @@ export function ChoiceGrid({
 					return (
 						<button
 							key={option}
+							ref={i === 0 ? firstRef : undefined}
 							type="button"
 							className={`choice${state}`}
 							disabled={locked}
