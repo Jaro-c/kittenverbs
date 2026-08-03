@@ -14,7 +14,7 @@ import { UnlockToast } from "./components/UnlockToast";
 import { VerbsPage } from "./components/VerbsPage";
 import type { AccessoryId } from "./lib/accessories";
 import { syncAchievements, type Achievement } from "./lib/achievements";
-import { buildSession } from "./lib/exercises";
+import { buildSession, EXAM_SIZE } from "./lib/exercises";
 import { isSession, useRouter, type RouteName } from "./lib/router";
 import {
 	loadProgress,
@@ -30,7 +30,6 @@ import type { Attempt, Exercise, SessionMode } from "./lib/types";
 import { withViewTransition } from "./lib/viewTransition";
 import "./app.css";
 
-const EXAM_SIZE = 15;
 const EXAM_SECONDS = 450; // 7:30 — thirty seconds a question.
 
 interface LiveSession {

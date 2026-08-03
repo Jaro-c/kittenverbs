@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { VERBS } from "../data/verbs";
+import { EXAM_SIZE } from "../lib/exercises";
 import { greeting } from "../lib/copy";
 import type { Progress } from "../lib/storage";
 import { HapticsToggle } from "./HapticsToggle";
@@ -96,7 +97,7 @@ export function Home({
 
 				<button className="btn btn--exam btn--big" type="button" onClick={onExam}>
 					Simulacro cronometrado
-					<small>{VERBS.length} preguntas · 7:30 · sin pistas ni opciones</small>
+					<small>{EXAM_SIZE} preguntas · 7:30 · sin pistas ni opciones</small>
 				</button>
 
 				{weakIds.length > 0 && (

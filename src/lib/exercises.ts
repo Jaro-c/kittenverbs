@@ -117,6 +117,14 @@ const BUILDERS = [buildType, buildChoice, buildRow];
 
 // ─── Session assembly ──────────────────────────────────────────────────────────
 
+/**
+ * Questions in a timed exam round: thirty seconds each against the 7:30 clock
+ * in App.tsx. Fixed by the time budget, not by how many verbs exist — kept
+ * here (not in App.tsx) so Home.tsx can show the true count without a
+ * circular import back to the component that owns the timer.
+ */
+export const EXAM_SIZE = 15;
+
 export interface SessionOptions {
 	mode: SessionMode;
 	/** How many questions. Defaults to one pass over every verb. */
