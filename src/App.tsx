@@ -26,7 +26,7 @@ import {
 	weakestVerbIds,
 	type Progress,
 } from "./lib/storage";
-import type { Attempt, Exercise, SessionMode } from "./lib/types";
+import type { Attempt, Difficulty, Exercise, SessionMode } from "./lib/types";
 import { withViewTransition } from "./lib/viewTransition";
 import "./app.css";
 
@@ -97,11 +97,12 @@ export default function App() {
 	const weakIds = useMemo(() => weakestVerbIds(progress, 10), [progress]);
 
 	const build = useCallback(
-		(mode: SessionMode, verbIds?: string[]): LiveSession => ({
+		(mode: SessionMode, verbIds?: string[], difficulty?: Difficulty): LiveSession => ({
 			mode,
 			exercises: buildSession({
 				mode,
 				verbIds,
+				difficulty,
 				// A review round of two verbs should still be worth opening, so it
 				// asks each of them a few times rather than ending in two taps.
 				size:
@@ -152,10 +153,10 @@ export default function App() {
 	}, []);
 
 	const start = useCallback(
-		(mode: SessionMode, verbIds?: string[]) => {
+		(mode: SessionMode, verbIds?: string[], difficulty?: Difficulty) => {
 			setOutcome(null);
 			setAnswered(0);
-			setSession(build(mode, verbIds));
+			setSession(build(mode, verbIds, difficulty));
 			const to: RouteName = mode === "exam" ? "exam" : "practice";
 			// Replacing when already there keeps "review my misses" from stacking a
 			// second identical entry, which would make back land on a dead round.
@@ -361,7 +362,7 @@ export default function App() {
 			<Home
 				progress={progress}
 				weakIds={weakIds}
-				onPractice={(verbIds) => start("practice", verbIds)}
+				onPractice={(verbIds, difficulty) => start("practice", verbIds, difficulty)}
 				onExam={() => start("exam")}
 				onPet={pet}
 				onReset={() => setPrompt("reset")}

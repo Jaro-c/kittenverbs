@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { VERBS } from "../data/verbs";
 import { EXAM_SIZE } from "../lib/exercises";
 import { greeting } from "../lib/copy";
 import type { Progress } from "../lib/storage";
+import type { Difficulty } from "../lib/types";
 import { HapticsToggle } from "./HapticsToggle";
 import { KittenStage } from "./KittenStage";
 import { SoundToggle } from "./SoundToggle";
@@ -11,11 +12,17 @@ import { WeekGoal } from "./WeekGoal";
 interface Props {
 	progress: Progress;
 	weakIds: string[];
-	onPractice: (verbIds?: string[]) => void;
+	onPractice: (verbIds?: string[], difficulty?: Difficulty) => void;
 	onExam: () => void;
 	onPet: (x: number, y: number) => void;
 	onReset: () => void;
 }
+
+const DIFFICULTIES: { id: Difficulty; label: string; note: string }[] = [
+	{ id: "easy", label: "Fácil", note: "solo opción múltiple" },
+	{ id: "medium", label: "Medio", note: "mezclado" },
+	{ id: "hard", label: "Difícil", note: "sin opciones" },
+];
 
 /**
  * Only what is worth a glance, plus the two buttons she came for.
@@ -37,6 +44,7 @@ export function Home({
 	// flip between two wordings on an unrelated re-render.
 	const hello = useMemo(() => greeting(progress), [progress]);
 	const seen = Object.keys(progress.verbs).length;
+	const [difficulty, setDifficulty] = useState<Difficulty>("medium");
 
 	return (
 		<section className="home">
@@ -85,11 +93,30 @@ export function Home({
 
 			<WeekGoal progress={progress} />
 
+			<div
+				className="filters"
+				role="group"
+				aria-label="Dificultad de la práctica"
+			>
+				{DIFFICULTIES.map((option) => (
+					<button
+						key={option.id}
+						type="button"
+						className={`filter${difficulty === option.id ? " filter--on" : ""}`}
+						aria-pressed={difficulty === option.id}
+						onClick={() => setDifficulty(option.id)}
+					>
+						{option.label}
+						<small> · {option.note}</small>
+					</button>
+				))}
+			</div>
+
 			<div className="home__actions">
 				<button
 					className="btn btn--primary btn--big"
 					type="button"
-					onClick={() => onPractice()}
+					onClick={() => onPractice(undefined, difficulty)}
 				>
 					Practicar
 					<small>{VERBS.length} preguntas · escribir, elegir y completar</small>
@@ -104,7 +131,7 @@ export function Home({
 					<button
 						className="btn btn--ghost btn--big"
 						type="button"
-						onClick={() => onPractice(weakIds)}
+						onClick={() => onPractice(weakIds, difficulty)}
 					>
 						Repasar los que se me escapan
 						<small>

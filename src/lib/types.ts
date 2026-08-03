@@ -77,6 +77,15 @@ export type ExerciseKind = Exercise["kind"];
 
 export type SessionMode = "practice" | "exam";
 
+/**
+ * How a practice round is built. Only affects `mode: "practice"` — the exam is
+ * already the hardest, hint-free format there is, so it ignores this.
+ * "easy"   → multiple choice only, pure recognition.
+ * "medium" → the original mix: typing, choice and completing a row.
+ * "hard"   → typing and completing a row only, same recall-only pool the exam uses.
+ */
+export type Difficulty = "easy" | "medium" | "hard";
+
 /** One graded attempt, kept so the results screen can explain what went wrong. */
 export interface Attempt {
 	exerciseId: string;

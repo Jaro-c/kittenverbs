@@ -1,6 +1,6 @@
 import { VERBS } from "../data/verbs";
 import { acceptedAnswers, canonicalAnswer } from "./check";
-import type { Exercise, Field, SessionMode, Verb } from "./types";
+import type { Difficulty, Exercise, Field, SessionMode, Verb } from "./types";
 
 // ─── Random helpers ────────────────────────────────────────────────────────────
 
@@ -127,7 +127,14 @@ function buildRow(verb: Verb): Exercise {
 	};
 }
 
-const BUILDERS = [buildType, buildChoice, buildRow];
+/** Typing or completing a row: no options on screen, pure recall. */
+const RECALL_BUILDERS = [buildType, buildRow];
+
+const BUILDERS_BY_DIFFICULTY: Record<Difficulty, typeof RECALL_BUILDERS> = {
+	easy: [buildChoice],
+	medium: [buildType, buildChoice, buildRow],
+	hard: RECALL_BUILDERS,
+};
 
 // ─── Session assembly ──────────────────────────────────────────────────────────
 
@@ -145,6 +152,8 @@ export interface SessionOptions {
 	size?: number;
 	/** Restrict to these verb ids. Defaults to all of them. */
 	verbIds?: string[];
+	/** Only read in practice mode; the exam has its own fixed, recall-only pool. */
+	difficulty?: Difficulty;
 }
 
 /**
@@ -169,8 +178,8 @@ export function buildSession(options: SessionOptions): Exercise[] {
 		// multiple choice is dropped so a lucky guess cannot inflate the score.
 		const builder =
 			options.mode === "exam"
-				? pick([buildType, buildRow])
-				: pick(BUILDERS);
+				? pick(RECALL_BUILDERS)
+				: pick(BUILDERS_BY_DIFFICULTY[options.difficulty ?? "medium"]);
 		exercises.push(builder(verb));
 	}
 	return exercises;
